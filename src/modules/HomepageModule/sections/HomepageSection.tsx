@@ -2,6 +2,7 @@
 
 import React from "react";
 import { categories } from "../constant";
+import Link from "next/link"; // Import the Link component from Next.js
 
 export const HomepageSection = () => {
   return (
@@ -24,34 +25,36 @@ export const HomepageSection = () => {
             key={category.id}
             className="group relative bg-white shadow-xl hover:shadow-2xl rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 overflow-hidden"
           >
+            <div
+              className={`absolute inset-0 bg-gradient-to-br ${
+                index % 3 === 0
+                  ? "from-[#4793AF] to-[#FFC470]"
+                  : index % 3 === 1
+                  ? "from-[#FFC470] to-[#DD5746]"
+                  : "from-[#DD5746] to-[#8B322C]"
+              } opacity-20 z-0`}
+            />
 
-            <div className={`absolute inset-0 bg-gradient-to-br ${
-              index % 3 === 0 
-                ? "from-[#4793AF] to-[#FFC470]" 
-                : index % 3 === 1 
-                ? "from-[#FFC470] to-[#DD5746]" 
-                : "from-[#DD5746] to-[#8B322C]"
-            } opacity-20 z-0`} />
-            
             <div className="relative z-10">
               <h2 className="text-2xl font-bold text-[#8B322C] mb-4">
                 {category.name}
               </h2>
               <div className="flex flex-wrap gap-3">
                 {category.subcategories.map((sub) => (
-                  <button
-                    key={sub.id}
-                    className="bg-[#DD5746] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#8B322C] transition-colors duration-200 shadow-md hover:shadow-lg"
-                  >
-                    {sub.name}
-                  </button>
+                  // Wrap the "Buat Laporan" button with Link to navigate to /report
+                  <Link key={sub.id} href={sub.name === "Buat Laporan" ? "/report" : "#"}>
+                    <button
+                      className="bg-[#DD5746] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#8B322C] transition-colors duration-200 shadow-md hover:shadow-lg"
+                    >
+                      {sub.name}
+                    </button>
+                  </Link>
                 ))}
               </div>
             </div>
           </div>
         ))}
       </div>
-
 
       <div className="absolute top-0 left-0 w-72 h-72 bg-[#FFC470]/10 rounded-full blur-3xl -z-0" />
       <div className="absolute bottom-0 right-0 w-72 h-72 bg-[#4793AF]/10 rounded-full blur-3xl -z-0" />
