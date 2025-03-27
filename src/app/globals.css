@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --primary-color: #D84040;  
-  --secondary-color: #A31D1D; 
-  --background-color: #F8F2DE; 
-  --card-background: #ECDC8F;  
-  --text-color: #121212;  
+  --primary-color: #DD5746;
+  --accent-1: #FFC470;
+  --accent-2: #4793AF;
+  --accent-3: #8B322C;
+  --background-color: #FFFFFF;
+  --text-color: #2D3748;
 }
 
 body {
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: 'Arial', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 h1, h2, h3 {
