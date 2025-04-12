@@ -41,8 +41,16 @@ export const HomepageSection = () => {
               </h2>
               <div className="flex flex-wrap gap-3">
                 {category.subcategories.map((sub) => (
-                  // Wrap the "Buat Laporan" button with Link to navigate to /report
-                  <Link key={sub.id} href={sub.name === "Buat Laporan" ? "/report" : "#"}>
+                  <Link
+                    key={sub.id}
+                    href={
+                      sub.name === "Buat Laporan"
+                        ? "/report"
+                        : sub.name === "Lihat Publikasi"
+                        ? "/publikasi"
+                        : "#"
+                    }
+                  >
                     <button
                       className="bg-[#DD5746] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#8B322C] transition-colors duration-200 shadow-md hover:shadow-lg"
                     >

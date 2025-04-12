@@ -22,8 +22,7 @@ export const categories: KategoriProps[] = [
     id: 3,
     name: "Publikasi",
     subcategories: [
-      { id: 301, name: "Buat Artikel" },
-      { id: 302, name: "Kelola Artikel" },
+      { id: 301, name: "Lihat Publikasi" },
     ],
   },
 ];
