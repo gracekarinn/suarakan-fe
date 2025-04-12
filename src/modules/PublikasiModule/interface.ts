@@ -3,5 +3,7 @@ export interface Publication {
     title: string;
     description: string;
     fileLink: string;
+    createdAt: string;
+    updatedAt?: string
   }
   

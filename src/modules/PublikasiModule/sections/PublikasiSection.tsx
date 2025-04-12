@@ -21,6 +21,23 @@ export default function PublikasiSection() {
             <div className="max-w-3xl">
               <h2 className="text-lg font-semibold text-orange-700">{pub.title}</h2>
               <p className="text-sm text-gray-700 mt-1">{pub.description}</p>
+              <p className="text-xs text-gray-500 mt-2">
+                Dibuat pada: {new Date(pub.createdAt).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+                {pub.updatedAt && (
+                  <>
+                    {" | "}Terakhir diedit:{" "}
+                    {new Date(pub.updatedAt).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </>
+                )}
+              </p>
             </div>
             <a
               href={pub.fileLink}
