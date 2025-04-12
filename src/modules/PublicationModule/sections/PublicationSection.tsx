@@ -1,11 +1,9 @@
-// app/(user)/publikasi/page.tsx atau publikasi.tsx
-
 "use client";
 
 import { publications } from "../constant";
 import { Publication } from "../interface";
 
-export default function PublikasiSection() {
+export default function PublicationSection() {
   return (
     <div className="min-h-screen px-6 py-12 bg-[#FCFCFC]">
       <h1 className="text-3xl md:text-4xl font-bold text-center text-orange-600 mb-10">
