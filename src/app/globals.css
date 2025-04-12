@@ -1,39 +1,51 @@
 @import "tailwindcss";
 
+
 :root {
-  --primary-color: #DD5746;
-  --accent-1: #FFC470;
-  --accent-2: #4793AF;
-  --accent-3: #8B322C;
+  --primary-color: #F94C10;
+
+  --secondary-color: #C70039;
+
+  --cta-color: #F8DE22;
+  
+  --accent-1: #BB390C;
+  --accent-2: #FDC8B5;
+
   --background-color: #FFFFFF;
   --text-color: #2D3748;
+  
+  --card-background: #FFF8F5;
 }
 
 body {
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Albert Sans', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 h1, h2, h3 {
   color: var(--primary-color);
+  margin-top: 0;
 }
 
 .card {
   background-color: var(--card-background);
   border-radius: 8px;
   padding: 16px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
 }
 
 .button-primary {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--cta-color);
+  color: #F8DE22;
   padding: 10px 16px;
   border-radius: 5px;
   border: none;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background-color 0.3s;
 }
 
 .button-primary:hover {
