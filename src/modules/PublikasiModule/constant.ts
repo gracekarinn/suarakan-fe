@@ -30,5 +30,12 @@ export const publications: Publication[] = [
     description:
       "Dokumen evaluasi terhadap kebijakan dan prosedur tindak lanjut pelaporan kekerasan seksual yang diterapkan di lingkungan universitas.",
     fileLink: "#"
+  },
+  {
+    id: 5,
+    title: "Evaluasi Kebijakan Tindak Lanjut Pelaporan",
+    description:
+      "Dokumen evaluasi terhadap kebijakan dan prosedur tindak lanjut pelaporan kekerasan seksual yang diterapkan di lingkungan universitas.",
+    fileLink: "#"
   }
 ];
