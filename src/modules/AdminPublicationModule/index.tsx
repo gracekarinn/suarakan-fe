@@ -1,8 +1,3 @@
-import React from "react";
-import AdminPublicationSection from "./sections/AdminPublicationSection";
-
-const AdminPublicationModule = () => {
-  return <AdminPublicationSection />;
-};
-
-export default AdminPublicationModule;
+export { default as AdminPublicationSection } from "./sections/AdminPublicationSection";
+export { default as ViewPublicationSection } from "./sections/ViewPublicationSection";
+export { default as EditPublicationSection } from "./sections/EditPublicationSection";

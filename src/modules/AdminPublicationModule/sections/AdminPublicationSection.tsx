@@ -9,7 +9,7 @@ export default function AdminPublicationSection() {
     <div className="min-h-screen bg-white px-8 py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-orange-700">
-          Publikasi Kasus Kekerasan Seksual
+          Dashboard Publikasi Kasus Kekerasan Seksual
         </h1>
         <button className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded hover:bg-yellow-300">
           + Buat Publikasi
@@ -54,12 +54,12 @@ export default function AdminPublicationSection() {
                   </a>
                 </td>
                 <td className="px-4 py-2 border text-center space-x-2">
-                  <Link href={`/admin/publikasi/${pub.id}`}>
+                  <Link href={`/admin/publication/${pub.id}`}>
                     <button className="p-2 rounded bg-yellow-300 hover:bg-yellow-200">
                       <Eye size={16} />
                     </button>
                   </Link>
-                  <Link href={`/admin/publikasi/edit/${pub.id}`}>
+                  <Link href={`/admin/publication/edit/${pub.id}`}>
                     <button className="p-2 rounded bg-yellow-300 hover:bg-yellow-200">
                       <Pencil size={16} />
                     </button>
