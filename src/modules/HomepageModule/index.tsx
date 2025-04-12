@@ -1,13 +1,7 @@
-// modules/homepagemodules/sections/index.tsx
-
 import React from "react";
 import Image from "next/image";
-import { homepageContent } from "./constant"; // Pastikan path dan ekspor sudah benar
+import { homepageContent } from "./constant";
 
-/**
- * Komponen utama HomepageSections
- * Menampilkan Hero dan section "Mengapa SUARAKAN?"
- */
 const HomepageSections: React.FC = () => {
   const { heroSection, whySuarakanSection } = homepageContent;
 

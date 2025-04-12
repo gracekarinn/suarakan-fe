@@ -1,8 +1,8 @@
 // modules/homepagemodules/sections/homepagesection.tsx
 
 'use client';
-import React from "react";
 import Image from "next/image";
+import React from "react";
 import { homepageContent } from "../constant";
 
 const HomepageSection: React.FC = () => {
