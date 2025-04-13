@@ -1,11 +1,13 @@
-
-
 export interface AdminReport {
-    id: number;
-    reporter: string;
-    description: string;
-    reportDate: string;
-    status: "received" | "processing" | "completed" | "rejected";
-    updatedAt?: string;
-  }
-  
+  reportId: string;
+  reporterId: string;
+  createdAt: string;
+  updatedAt: string;
+  proofId: string;
+  incidentId: string;
+  victimId: string;
+  accusedId: string;
+  description: string;
+  authority?: "univ-indonesia" | "komnas-perempuan" | "komnas-ham" | ""; 
+  status?: "received" | "processing" | "completed" | "rejected";
+}

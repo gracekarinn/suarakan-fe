@@ -1,8 +1,2 @@
-import React from "react";
-import AdminReportSection from "./sections/AdminReportSection";
-
-const AdminReportModule = () => {
-  return <AdminReportSection />;
-};
-
-export default AdminReportModule;
+export { default as AdminReportSection } from "./sections/AdminReportSection";
+export { default as AdminReportDetailSection } from "./sections/AdminReportDetailSection";
