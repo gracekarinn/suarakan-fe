@@ -1,33 +1,19 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useState, useContext, useEffect } from "react";
+import { useState } from "react";
 import { usePublicationContext } from "@/context/PublicationContext";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const EditPublicationSection = () => {
-  const params = useParams();
+const CreatePublicationSection = () => {
+  const { addPublication, publications } = usePublicationContext();
   const router = useRouter();
-  const { id } = params;
-  const { publications, updatePublication } = usePublicationContext();
-
-  const pub = publications.find((p) => p.id === Number(id));
 
   const [form, setForm] = useState({
     title: "",
     description: "",
     fileLink: "",
   });
-
-  useEffect(() => {
-    if (pub) {
-      setForm({
-        title: pub.title,
-        description: pub.description,
-        fileLink: pub.fileLink,
-      });
-    }
-  }, [pub]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -38,28 +24,24 @@ const EditPublicationSection = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pub) {
-      updatePublication({
-        ...pub,
-        title: form.title,
-        description: form.description,
-        fileLink: form.fileLink,
-        updatedAt: new Date().toISOString().split("T")[0],
-      });
-    }
+
+    const newPublication = {
+      id: publications.length + 1,
+      title: form.title,
+      description: form.description,
+      fileLink: form.fileLink,
+      createdAt: new Date().toISOString().split("T")[0],
+      updatedAt: undefined,
+    };
+
+    addPublication(newPublication);
     router.push("/admin/publication");
   };
-
-  if (!pub) {
-    return <div className="p-6">Publikasi tidak ditemukan.</div>;
-  }
 
   return (
     <div className="min-h-screen bg-white px-8 py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-orange-700">
-          Edit Publikasi Kasus Kekerasan Seksual
-        </h1>
+        <h1 className="text-3xl font-bold text-orange-700">Buat Publikasi Baru</h1>
         <Link href="/admin/publication">
           <button className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-4 py-2 rounded-md">
             ← Kembali ke Dashboard
@@ -116,7 +98,7 @@ const EditPublicationSection = () => {
             type="submit"
             className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-5 py-2 rounded-lg shadow"
           >
-            Simpan Perubahan
+            Simpan
           </button>
 
           <Link href="/admin/publication">
@@ -133,4 +115,4 @@ const EditPublicationSection = () => {
   );
 };
 
-export default EditPublicationSection;
+export default CreatePublicationSection;

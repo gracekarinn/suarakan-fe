@@ -4,11 +4,13 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { adminpublications } from "../constant";
 import { AdminPublication } from "../interface";
+import { usePublicationContext } from "@/context/PublicationContext";
 
 const ViewPublicationSection = () => {
   const params = useParams();
   const { id } = params;
-  const pub: AdminPublication | undefined = adminpublications.find(
+  const { publications } = usePublicationContext();
+  const pub: AdminPublication | undefined = publications.find(
     (p) => p.id === Number(id)
   );
 
