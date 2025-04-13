@@ -3,7 +3,7 @@ import { useState, FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://kelompok-3-suarakan-auth.pkpl.cs.ui.ac.id";
 
 interface RegisterFormData {
   full_name: string;
@@ -142,7 +142,7 @@ export default function RegisterSection() {
         </div>
   
         {/* Right Section */}
-        <div className="overflow-y-auto px-6 py-8 md:p-10">
+        <div className="px-6 py-8 md:p-10 overflow-y-auto max-h-[90vh]">
           <div className="flex flex-col items-center mb-6">
             <h2 className="text-2xl font-bold text-orange-700 mb-1">Daftar Akun</h2>
             <p className="text-sm text-gray-600 text-center">
@@ -283,7 +283,7 @@ export default function RegisterSection() {
           <div className="text-center mt-6">
             <p className="text-sm text-gray-700">
               Sudah punya akun?{" "}
-              <Link href="/login" className="font-semibold text-orange-600 hover:underline">
+              <Link href="/auth/login" className="font-semibold text-orange-600 hover:underline">
                 Masuk Sekarang
               </Link>
             </p>
