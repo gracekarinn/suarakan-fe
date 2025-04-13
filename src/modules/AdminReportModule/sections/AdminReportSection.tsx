@@ -5,26 +5,26 @@ import { Eye } from "lucide-react";
 import Link from "next/link";
 import { adminReports as initialReports } from "../constant";
 import { AdminReport } from "../interface";
+import { maskName } from "./utils";
 
 export default function AdminReportSection() {
     const [reports, setReports] = useState<AdminReport[]>(initialReports);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [pendingUpdate, setPendingUpdate] = useState<{
         reportId: string;
         newStatus: NonNullable<AdminReport["status"]>;
     } | null>(null);
 
-    const handleStatusChange = (
-        reportId: string,
-        newStatus: NonNullable<AdminReport["status"]>
-    ) => {
-        setPendingUpdate({ reportId, newStatus });
-        setIsModalOpen(true);
-    };
+const handleStatusChange = (
+    reportId: string,
+    newStatus: NonNullable<AdminReport["status"]>
+) => {
+    setPendingUpdate({ reportId, newStatus });
+    setIsModalOpen(true);
+};
 
-    const confirmUpdate = () => {
-        if (pendingUpdate) {
+const confirmUpdate = () => {
+    if (pendingUpdate) {
         setReports((prevReports) =>
             prevReports.map((report) =>
             report.reportId === pendingUpdate.reportId
@@ -32,19 +32,18 @@ export default function AdminReportSection() {
                 : report
             )
         );
-        }
-        setIsModalOpen(false);
-        setPendingUpdate(null);
-    };
+    }
+    setIsModalOpen(false);
+    setPendingUpdate(null);
+};
 
-    const cancelUpdate = () => {
-        setIsModalOpen(false);
-        setPendingUpdate(null);
-    };
+const cancelUpdate = () => {
+    setIsModalOpen(false);
+    setPendingUpdate(null);
+};
 
     return (
         <div className="min-h-screen bg-white px-8 py-6">
-        {/* Header */}
         <div className="flex items-center mb-6">
             <div className="flex-1">
             <h1 className="text-3xl font-bold text-orange-700 text-center">
@@ -53,7 +52,6 @@ export default function AdminReportSection() {
             </div>
         </div>
 
-        {/* Tabel Pelaporan */}
         <div className="overflow-x-auto rounded-lg shadow">
             <table className="min-w-full bg-white border border-gray-200">
             <thead className="bg-orange-100 text-orange-800 text-sm font-semibold">
@@ -62,8 +60,6 @@ export default function AdminReportSection() {
                 <th className="px-4 py-3 border">Pelapor</th>
                 <th className="px-4 py-3 border text-left">Incident</th>
                 <th className="px-4 py-3 border">Tanggal Pelaporan</th>
-                {/* Kolom baru: Terakhir Diperbarui */}
-                <th className="px-4 py-3 border">Terakhir Diperbarui</th>
                 <th className="px-4 py-3 border">Status</th>
                 <th className="px-4 py-3 border">Lihat Detail</th>
                 </tr>
@@ -75,7 +71,7 @@ export default function AdminReportSection() {
                     {index + 1}.
                     </td>
                     <td className="px-4 py-2 text-center border">
-                    {report.reporterId}
+                    {maskName(report.reporterId)}
                     </td>
                     <td className="px-4 py-2 border text-sm text-gray-700">
                     {report.description.length > 50
@@ -84,10 +80,6 @@ export default function AdminReportSection() {
                     </td>
                     <td className="px-4 py-2 text-center border">
                     {report.createdAt}
-                    </td>
-                    {/* Menampilkan updatedAt, atau "-" jika undefined */}
-                    <td className="px-4 py-2 text-center border">
-                    {report.updatedAt ? report.updatedAt : "-"}
                     </td>
                     <td className="px-4 py-2 text-center border">
                     <select
@@ -120,15 +112,12 @@ export default function AdminReportSection() {
             </table>
         </div>
 
-        {/* Modal Konfirmasi Update Status */}
         {isModalOpen && (
             <div className="fixed inset-0 flex items-center justify-center z-50">
-            {/* Overlay */}
             <div
                 className="fixed inset-0 bg-black opacity-50"
                 onClick={cancelUpdate}
             ></div>
-            {/* Konten Modal */}
             <div className="bg-white rounded p-6 z-10 max-w-sm mx-auto">
                 <h2 className="text-xl font-bold mb-4">Konfirmasi Update</h2>
                 <p className="mb-4">

@@ -4,13 +4,14 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { adminReports } from "../constant";
 import { AdminReport } from "../interface";
+import { isValidUUID, maskName } from "./utils";
 
 interface AdminReportDetailSectionProps {
     reportId: string;
 }
 
 export default function AdminReportDetailSection({
-    reportId,
+reportId,
 }: AdminReportDetailSectionProps) {
 const router = useRouter();
 
@@ -19,12 +20,24 @@ const [reportData, setReportData] = useState<AdminReport | null>(null);
 const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
 const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
 
+const isDataValid = isValidUUID(reportId);
+
 useEffect(() => {
+    if (isDataValid) {
     const foundReport = adminReports.find((r) => r.reportId === reportId);
     if (foundReport) {
-    setReportData(foundReport);
+        setReportData(foundReport);
     }
-}, [reportId]);
+    }
+}, [reportId, isDataValid]);
+
+if (!isDataValid) {
+    return (
+    <div className="min-h-screen bg-white p-6 md:p-10">
+        <p>Report ID tidak valid.</p>
+    </div>
+    );
+}
 
 if (!reportData) {
     return (
@@ -62,7 +75,7 @@ return (
     </h1>
 
     <div className="space-y-4 max-w-xl">
-        {/* ID Laporan */}
+        {/* Field-field read-only */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
             ID Laporan
@@ -75,7 +88,6 @@ return (
         />
         </div>
 
-        {/* Pelapor */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
             Pelapor
@@ -84,14 +96,14 @@ return (
             type="text"
             readOnly
             className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100"
-            value={reportData.reporterId}
+            value={maskName(reportData.reporterId)}
         />
         </div>
 
         {/* Tanggal Dibuat */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
-            Tanggal Pelaporan
+            Tanggal Dibuat
         </label>
         <input
             type="text"
@@ -104,7 +116,7 @@ return (
         {/* Tanggal Update */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
-            Terakhir Diperbarui
+            Tanggal Update
         </label>
         <input
             type="text"
@@ -127,15 +139,15 @@ return (
         />
         </div>
 
-        {/* Description */}
+        {/* Deskripsi */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
             Deskripsi
         </label>
         <textarea
             readOnly
-            className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100"
             rows={3}
+            className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100"
             value={reportData.description}
         />
         </div>
@@ -149,7 +161,7 @@ return (
             type="text"
             readOnly
             className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100"
-            value={reportData.victimId}
+            value={maskName(reportData.victimId)}
         />
         </div>
 
@@ -162,11 +174,11 @@ return (
             type="text"
             readOnly
             className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100"
-            value={reportData.accusedId}
+            value={maskName(reportData.accusedId)}
         />
         </div>
 
-        {/* Otoritas + Tombol Kirim */}
+        {/* Tombol Kirim */}
         <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
             Ingin dilaporkan ke mana?
@@ -193,7 +205,7 @@ return (
         </div>
     </div>
 
-    {/* Tombol Kembali ke Beranda di bagian bawah */}
+    {/* Tombol Kembali */}
     <div className="mt-8">
         <button
         onClick={() => router.push("/admin/report")}
@@ -203,19 +215,17 @@ return (
         </button>
     </div>
 
-    {/* Modal Konfirmasi: Pertama */}
+    {/* MODAL PERTAMA */}
     {isFirstModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-        {/* Overlay */}
         <div
             className="fixed inset-0 bg-black bg-opacity-50"
-            onClick={() => setIsFirstModalOpen(false)}
+            onClick={handleConfirmNo}
         />
-        {/* Konten Modal */}
         <div className="relative bg-white rounded shadow-lg p-6 max-w-sm mx-auto">
             <h2 className="text-lg font-bold mb-4">Konfirmasi Pengiriman</h2>
             <p className="mb-6">
-            Apakah Anda yakin ingin mengirim laporan ke pihak berwenang "
+            Apakah Anda yakin ingin mengirim laporan ke otoritas "
             {reportData.authority}"?
             </p>
             <div className="flex justify-end space-x-3">
@@ -236,21 +246,19 @@ return (
         </div>
     )}
 
-    {/* Modal Kedua: Berhasil */}
+    {/* MODAL KEDUA */}
     {isSecondModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-        {/* Overlay */}
         <div
             className="fixed inset-0 bg-black bg-opacity-50"
-            onClick={() => setIsSecondModalOpen(false)}
+            onClick={handleSuccessModalClose}
         />
-        {/* Konten Modal */}
         <div className="relative bg-white rounded shadow-lg p-6 max-w-sm mx-auto">
             <h2 className="text-lg font-bold mb-4">Pengiriman Berhasil</h2>
             <p className="mb-6">
-            Laporan berhasil dikirim ke pihak berwenang "
-            {reportData.authority}".<br />
-            Ingat untuk mengubah status laporan di halaman admin.
+            Laporan berhasil dikirim ke otoritas "{reportData.authority}".
+            <br />
+            Silakan update status di dashboard.
             </p>
             <div className="flex justify-end space-x-3">
             <button
