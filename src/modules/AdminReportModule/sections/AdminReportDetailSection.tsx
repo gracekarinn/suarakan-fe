@@ -6,22 +6,21 @@ import { adminReports } from "../constant";
 import { AdminReport } from "../interface";
 
 interface AdminReportDetailSectionProps {
-reportId: string;
+    reportId: string;
 }
 
 export default function AdminReportDetailSection({
-reportId,
+    reportId,
 }: AdminReportDetailSectionProps) {
 const router = useRouter();
 
 const [reportData, setReportData] = useState<AdminReport | null>(null);
-const [isSent, setIsSent] = useState(false);
-const [isModalOpen, setIsModalOpen] = useState(false);
+
+const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
+const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
 
 useEffect(() => {
-    console.log("Mencari data dengan reportId:", reportId);
     const foundReport = adminReports.find((r) => r.reportId === reportId);
-    console.log("Ditemukan:", foundReport);
     if (foundReport) {
     setReportData(foundReport);
     }
@@ -35,24 +34,24 @@ if (!reportData) {
     );
 }
 
+const isKirimDisabled = reportData.status !== "received";
+
 const handleSend = () => {
-    if (!reportData.authority) {
-    alert("Laporan belum memiliki innformasi instansi berwenang yang dituju.");
-    return;
-    }
-    setIsModalOpen(true);
+    if (isKirimDisabled) return;
+    setIsFirstModalOpen(true);
 };
 
-const confirmSend = () => {
-    setIsSent(true);
-    setIsModalOpen(false);
+const handleConfirmYes = () => {
+    setIsFirstModalOpen(false);
+    setIsSecondModalOpen(true);
 };
 
-const cancelSend = () => {
-    setIsModalOpen(false);
+const handleConfirmNo = () => {
+    setIsFirstModalOpen(false);
 };
 
-const goBack = () => {
+const handleSuccessModalClose = () => {
+    setIsSecondModalOpen(false);
     router.push("/admin/report");
 };
 
@@ -92,7 +91,7 @@ return (
         {/* Tanggal Dibuat */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
-            Tanggal Dibuat
+            Tanggal Pelaporan
         </label>
         <input
             type="text"
@@ -105,7 +104,7 @@ return (
         {/* Tanggal Update */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
-            Tanggal Update
+            Terakhir Diperbarui
         </label>
         <input
             type="text"
@@ -128,7 +127,7 @@ return (
         />
         </div>
 
-        {/* Deskripsi */}
+        {/* Description */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
             Deskripsi
@@ -141,7 +140,7 @@ return (
         />
         </div>
 
-        {/* Korban */}
+        {/* Victim */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
             Korban
@@ -154,7 +153,7 @@ return (
         />
         </div>
 
-        {/* Pelaku */}
+        {/* Accused */}
         <div>
         <label className="block text-sm font-medium text-gray-700">
             Pelaku
@@ -167,7 +166,7 @@ return (
         />
         </div>
 
-        {/* Otoritas dan Tombol Kirim */}
+        {/* Otoritas + Tombol Kirim */}
         <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
             Ingin dilaporkan ke mana?
@@ -181,56 +180,84 @@ return (
             />
             <button
             onClick={handleSend}
-            disabled={isSent}
+            disabled={isKirimDisabled}
             className={`px-3 py-2 rounded font-semibold text-white ${
-                isSent
+                isKirimDisabled
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-orange-600 hover:bg-orange-500"
             }`}
             >
-            {isSent ? "Terkirim" : "Kirim"}
+            Kirim
             </button>
         </div>
         </div>
     </div>
 
-    {/* Tombol Kembali ke Beranda */}
+    {/* Tombol Kembali ke Beranda di bagian bawah */}
     <div className="mt-8">
         <button
-        onClick={goBack}
+        onClick={() => router.push("/admin/report")}
         className="px-4 py-2 rounded font-semibold text-white bg-gray-500 hover:bg-gray-400"
         >
         Kembali ke Beranda
         </button>
     </div>
 
-    {/* Modal Konfirmasi */}
-    {isModalOpen && (
+    {/* Modal Konfirmasi: Pertama */}
+    {isFirstModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
         {/* Overlay */}
         <div
             className="fixed inset-0 bg-black bg-opacity-50"
-            onClick={cancelSend}
+            onClick={() => setIsFirstModalOpen(false)}
         />
         {/* Konten Modal */}
         <div className="relative bg-white rounded shadow-lg p-6 max-w-sm mx-auto">
             <h2 className="text-lg font-bold mb-4">Konfirmasi Pengiriman</h2>
             <p className="mb-6">
-            Apakah Anda yakin ingin mengirim laporan ke otoritas "
+            Apakah Anda yakin ingin mengirim laporan ke pihak berwenang "
             {reportData.authority}"?
             </p>
             <div className="flex justify-end space-x-3">
             <button
-                onClick={confirmSend}
+                onClick={handleConfirmYes}
                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500"
             >
                 Ya
             </button>
             <button
-                onClick={cancelSend}
+                onClick={handleConfirmNo}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-500"
             >
                 Batal
+            </button>
+            </div>
+        </div>
+        </div>
+    )}
+
+    {/* Modal Kedua: Berhasil */}
+    {isSecondModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+        {/* Overlay */}
+        <div
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={() => setIsSecondModalOpen(false)}
+        />
+        {/* Konten Modal */}
+        <div className="relative bg-white rounded shadow-lg p-6 max-w-sm mx-auto">
+            <h2 className="text-lg font-bold mb-4">Pengiriman Berhasil</h2>
+            <p className="mb-6">
+            Laporan berhasil dikirim ke pihak berwenang "
+            {reportData.authority}".<br />
+            Ingat untuk mengubah status laporan di halaman admin.
+            </p>
+            <div className="flex justify-end space-x-3">
+            <button
+                onClick={handleSuccessModalClose}
+                className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-500"
+            >
+                Update di Dashboard
             </button>
             </div>
         </div>
