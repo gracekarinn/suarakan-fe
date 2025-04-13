@@ -2,6 +2,7 @@
 import { useState, FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://kelompok-3-suarakan-auth.pkpl.cs.ui.ac.id";
 
@@ -22,6 +23,8 @@ export default function LoginSection() {
     type: null,
     text: "",
   });
+
+  const router = useRouter();
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -61,14 +64,14 @@ export default function LoginSection() {
         }),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
         setMessage({ type: "success", text: "Login berhasil. Mengarahkan..." });
-        // Redirect or store token/session
-      } else {
-        setMessage({ type: "error", text: "Email atau password salah" }); // Avoid leaking detail
+      
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
       }
+      
     } catch (error) {
       console.error("Login error:", (error as Error).message);
       setMessage({ type: "error", text: "Terjadi kesalahan jaringan. Silakan coba lagi." });
