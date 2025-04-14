@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ReportFormState, RelationshipType, ReportingLevel } from '../interface';
+import { ReportFormState, RelationshipType, ReportingLevel, StatusPernikahan } from '../interface';
 
 
 const ReportForm: React.FC = () => {
@@ -31,7 +31,7 @@ const ReportForm: React.FC = () => {
     victimOfficialAddress: '',
     victimEducation: '',
     victimFaxNumber: '',
-    victimMaritalStatus: '',
+    victimMarriageStatus: StatusPernikahan.BelumKawin,
     victimMarriageAge: '',
     victimSpecialNeeds: false,
     victimDisabilityDescription: '',
@@ -305,22 +305,19 @@ const ReportForm: React.FC = () => {
               placeholder="Nomor Fax"
               className="w-full p-2 border rounded"
             />
-            <input
-              type="text"
-              name="victimMaritalStatus"
-              value={formData.victimMaritalStatus}
+            <select
+              name="victimMarriageStatus"
+              value={formData.victimMarriageStatus}
               onChange={handleInputChange}
-              placeholder="Status Pernikahan"
               className="w-full p-2 border rounded"
-            />
-            <input
-              type="text"
-              name="victimMarriageAge"
-              value={formData.victimMarriageAge}
-              onChange={handleInputChange}
-              placeholder="Usia Pernikahan"
-              className="w-full p-2 border rounded"
-            />
+              required
+            >
+              <option value="">Pilih Status</option>
+              {Object.values(StatusPernikahan).map(relation => (
+                <option key={relation} value={relation}>{relation}</option>
+              ))}
+            </select>
+
             <div className="col-span-2 flex items-center">
               <input
                 type="checkbox"
