@@ -83,7 +83,8 @@ const Nav = () => {
           ) : (
             <>
               <Link href="/" className="hover:text-gray-300">Beranda</Link>
-              <Link href="/report" className="hover:text-gray-300">Pelacakan Pelaporan</Link>
+              <Link href="/report" className="hover:text-gray-300">Pelacakan</Link>
+              <Link href="/progress" className="hover:text-gray-300">Pelaporan</Link>
               <Link href="/publication" className="hover:text-gray-300">Publikasi</Link>
             </>
           )}
