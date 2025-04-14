@@ -12,7 +12,16 @@ export enum RelationshipType {
     Friend = 'Friend',
     Sibling = 'Sibling',
     In_Law = 'In_Law',
-    Social_Media_Friend = 'Social_Media_Friend'
+    Social_Media_Friend = 'Social_Media_Friend',
+    Stranger = 'Stranger'
+  }
+
+  export enum StatusPernikahan {
+    BelumKawin = 'Belum Kawin',
+    Kawin = 'Kawin',
+    CeraiHidup = 'Cerai Hidup',
+    CeraiMati = 'Cerai Mati',
+    KawinBelumTercatat = 'Kawin Belum Tercatat',
   }
   
   export enum ReportingLevel {
