@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Publication } from "@/modules/PublicationModule/interface";
 
-const API_BASE_URL = "http://localhost:3000";
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
 
 export default function AdminPublicationSection() {
   const [publications, setPublications] = useState<Publication[]>([]);
@@ -61,7 +61,7 @@ export default function AdminPublicationSection() {
   
   const fetchPublications = async (token: string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/publications`, {
+      const res = await fetch(`${BE_URL}/api/v1/publications`, {
         credentials: "include",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -95,7 +95,7 @@ export default function AdminPublicationSection() {
     if (publicationToDelete !== null) {
       try {
         const token = localStorage.getItem('access_token') || '';
-        const res = await fetch(`${API_BASE_URL}/api/v1/publications/${publicationToDelete}`, {
+        const res = await fetch(`${BE_URL}/api/v1/publications/${publicationToDelete}`, {
           method: "DELETE",
           credentials: "include",
           headers: {

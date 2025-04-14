@@ -3,7 +3,7 @@ import { useState, FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
-const API_BASE_URL = process.env.AUTH_URL ?? "http://localhost:8000";
+const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:8000";
 
 interface RegisterFormData {
   full_name: string;
@@ -89,7 +89,7 @@ export default function RegisterSection() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register/`, {
+      const response = await fetch(`${AUTH_URL}/api/auth/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

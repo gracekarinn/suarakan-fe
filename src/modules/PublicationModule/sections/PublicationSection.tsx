@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Publication } from "@/modules/PublicationModule/interface";
 
-const API_BASE_URL = "http://localhost:3000";
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
 
 export default function PublicationSection() {
   const [publications, setPublications] = useState<Publication[]>([]);
@@ -13,7 +13,7 @@ export default function PublicationSection() {
   useEffect(() => {
     const fetchPublications = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/v1/publications`, {credentials: "include"});
+        const res = await fetch(`${BE_URL}/api/v1/publications`, {credentials: "include"});
         if (!res.ok) throw new Error("Gagal memuat data publikasi.");
         const data: Publication[] = await res.json();
         setPublications(data);
