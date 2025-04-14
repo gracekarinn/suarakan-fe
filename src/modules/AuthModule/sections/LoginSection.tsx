@@ -4,7 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const API_BASE_URL = process.env.AUTH_URL ?? "http://localhost:8000";
+const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:8000";
 
 interface LoginFormData {
   email: string;
@@ -52,7 +52,7 @@ export default function LoginSection() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
+      const response = await fetch(`${AUTH_URL}/api/auth/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,12 +70,13 @@ export default function LoginSection() {
         localStorage.setItem("refresh_token", data.refresh);
         localStorage.setItem("user_id", JSON.stringify(data.user_id));
         localStorage.setItem("user_role", data.user_role);
+        localStorage.setItem("is_logged_in", "true");
 
         setMessage({ type: "success", text: "Login berhasil. Mengarahkan..." });
       
         setTimeout(() => {
-          router.push("/");
-        }, 1000);
+          window.location.href = "/";
+        }, 1000);        
       }
       
     } catch (error) {

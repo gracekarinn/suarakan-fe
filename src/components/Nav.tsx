@@ -2,123 +2,98 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-// Interface untuk data user
 interface UserData {
-  userId: number;
-  fullName: string;
+  id: number;
+  full_name: string;
   email: string;
-  role: string;
+  user_type: string;
+  is_email_verified: boolean;
 }
 
 const Nav = () => {
-  const [isClient, setIsClient] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [currentPath, setCurrentPath] = useState('/');
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  // Pastikan kode hanya dijalankan di client-side
   useEffect(() => {
-    setIsClient(true);
-    setCurrentPath(window.location.pathname);
-    
-    // Cek apakah ada data user di localStorage
-    const storedUser = localStorage.getItem('mockUser');
-    
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setIsLoggedIn(true);
-        setUserData(parsedUser);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('mockUser');
-      }
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+
+    if (token) {
+      fetchUserData(token);
+    } else {
+      setLoading(false);
     }
   }, []);
 
-  // Fungsi utilitas untuk simulasi login
-  const simulateLogin = (role: string) => {
-    const mockUsers = {
-      pengguna: {
-        userId: 1,
-        fullName: 'John Doe',
-        email: 'john@example.com',
-        role: 'pengguna'
-      },
-      admin: {
-        userId: 2,
-        fullName: 'Admin User',
-        email: 'admin@example.com',
-        role: 'admin'
-      }
-    };
+  const fetchUserData = async (token: string) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/auth/user-profile/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        credentials: 'include',
+      });
 
-    const selectedUser = role === 'admin' ? mockUsers.admin : mockUsers.pengguna;
-    localStorage.setItem('mockUser', JSON.stringify(selectedUser));
-    setIsLoggedIn(true);
-    setUserData(selectedUser);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      setUserData(data);
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('mockUser');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('is_logged_in');
     setIsLoggedIn(false);
     setUserData(null);
-    window.location.href = '/';
+    router.push('/');
   };
 
-  // Jangan render apa pun jika masih server-side
-  if (!isClient) {
+  if (loading) {
     return null;
   }
 
   return (
     <nav style={{ backgroundColor: 'var(--primary-color)' }} className="text-white p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        {/* App Logo/Name */}
         <div className="text-xl font-bold">
-          <Link href="/">
-            SUARAKAN
-          </Link>
+          <Link href="/">SUARAKAN</Link>
         </div>
 
-        {/* Navigation Links - Different based on role */}
         <div className="flex items-center space-x-20">
-          {/* Admin Navigation */}
-          {isLoggedIn && userData?.role === 'admin' ? (
+          {isLoggedIn && userData?.user_type === 'ADMIN' ? (
             <>
-              <Link href="/admin/laporan" className="hover:text-gray-300">
-                Lihat Laporan
-              </Link>
-              <Link href="/admin/publikasi" className="hover:text-gray-300">
-                Buat Publikasi
-              </Link>
+              <Link href="/admin/report" className="hover:text-gray-300">Lihat Laporan</Link>
+              <Link href="/admin/publication" className="hover:text-gray-300">Buat Publikasi</Link>
             </>
           ) : (
-            /* User/Guest Navigation */
             <>
-              <Link href="/" className="hover:text-gray-300">
-                Beranda
-              </Link>
-              <Link href="/pelaporan" className="hover:text-gray-300">
-                Pelaporan
-              </Link>
-              <Link href="/pelacakan" className="hover:text-gray-300">
-                Pelacakan
-              </Link>
-              <Link href="/publikasi" className="hover:text-gray-300">
-                Publikasi
-              </Link>
+              <Link href="/" className="hover:text-gray-300">Beranda</Link>
+              <Link href="/report" className="hover:text-gray-300">Pelacakan Pelaporan</Link>
+              <Link href="/publication" className="hover:text-gray-300">Publikasi</Link>
             </>
           )}
         </div>
 
-        {/* User Info / Login Controls */}
         <div className="flex items-center space-x-2">
           {isLoggedIn ? (
             <>
-              <span>{userData?.role === 'admin' ? 'Admin' : userData?.fullName}</span>
-              <button 
+              <span>{localStorage.getItem("user_role") === 'ADMIN' ? 'Admin' : userData?.email}</span>
+              <button
                 onClick={handleLogout}
                 className="bg-white text-primary hover:bg-gray-300 px-3 py-1 rounded text-sm"
                 style={{ color: 'var(--primary-color)' }}
@@ -127,33 +102,13 @@ const Nav = () => {
               </button>
             </>
           ) : (
-            // Development tools untuk mock login
-            <div className="flex items-center space-x-2">
-              <Link 
-                href="/login" 
-                className="bg-white hover:bg-gray-300 px-4 py-2 rounded"
-                style={{ color: 'var(--primary-color)' }}
-              >
-                Login
-              </Link>
-              {/* Dev-only buttons */}
-              <div className="ml-4 border-l border-white pl-4 flex space-x-2">
-                <button 
-                  onClick={() => simulateLogin('pengguna')}
-                  className="bg-accent-2 text-white px-2 py-1 rounded text-xs hover:bg-opacity-80"
-                  title="Development only: Simulate user login"
-                >
-                  Dev: Login User
-                </button>
-                <button 
-                  onClick={() => simulateLogin('admin')}
-                  className="bg-accent-3 text-white px-2 py-1 rounded text-xs hover:bg-opacity-80"
-                  title="Development only: Simulate admin login"
-                >
-                  Dev: Login Admin
-                </button>
-              </div>
-            </div>
+            <Link
+              href="/auth/login"
+              className="bg-white hover:bg-gray-300 px-4 py-2 rounded"
+              style={{ color: 'var(--primary-color)' }}
+            >
+              Login
+            </Link>
           )}
         </div>
       </div>
