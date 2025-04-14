@@ -2,7 +2,15 @@
 
 import React, { useState } from 'react';
 import { ReportFormState, RelationshipType, ReportingLevel, StatusPernikahan } from '../interface';
-
+import {
+  sanitizeString,
+  sanitizeName,
+  validatePhone,
+  validateEmail,
+  validateUrl,
+  validateDate,
+  validateDescription
+} from './utils';
 
 const ReportForm: React.FC = () => {
   const [formData, setFormData] = useState<ReportFormState>({
@@ -50,7 +58,11 @@ const ReportForm: React.FC = () => {
     reportingLevel: ReportingLevel.UniversitasIndonesia
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
@@ -73,8 +85,62 @@ const ReportForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Report Submitted:', formData);
-    // ....
+    setErrors({});
+
+    let newErrors: { [key: string]: string } = {};
+
+    if (!validatePhone(formData.reporterPhone)) {
+      newErrors.reporterPhone = "Nomor telepon tidak valid. Harus terdiri dari 10-15 digit, dengan opsi '+' di awal.";
+    }
+    if (!validateDate(formData.reporterDateOfBirth)) {
+      newErrors.reporterDateOfBirth = "Tanggal lahir tidak valid.";
+    }
+    if (!validateDescription(formData.violationDescription)) {
+      newErrors.violationDescription = "Deskripsi pelanggaran harus minimal 10 karakter.";
+    }
+    if (!validateEmail(formData.victimEmail)) {
+      newErrors.victimEmail = "Email korban tidak valid.";
+    }
+    if (formData.evidenceLink && !validateUrl(formData.evidenceLink)) {
+      newErrors.evidenceLink = "Link bukti tidak valid.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    const sanitizedData: ReportFormState = {
+      ...formData,
+      reporterPhone: sanitizeString(formData.reporterPhone),
+      reporterJob: sanitizeString(formData.reporterJob),
+      reporterAddress: sanitizeString(formData.reporterAddress),
+      violationLocation: sanitizeString(formData.violationLocation),
+      violationDescription: sanitizeString(formData.violationDescription),
+      pastEffort: sanitizeString(formData.pastEffort),
+      evidenceLink: sanitizeString(formData.evidenceLink),
+      victimFullName: sanitizeName(formData.victimFullName),
+      victimNIK: sanitizeString(formData.victimNIK),
+      victimEmail: formData.victimEmail.trim(),
+      victimDomicileAddress: sanitizeString(formData.victimDomicileAddress),
+      victimPhone: sanitizeString(formData.victimPhone),
+      victimJob: sanitizeString(formData.victimJob),
+      victimPlaceOfBirth: sanitizeString(formData.victimPlaceOfBirth),
+      victimOfficialAddress: sanitizeString(formData.victimOfficialAddress),
+      victimEducation: sanitizeString(formData.victimEducation),
+      victimFaxNumber: sanitizeString(formData.victimFaxNumber),
+      victimMarriageAge: sanitizeString(formData.victimMarriageAge),
+      victimDisabilityDescription: sanitizeString(formData.victimDisabilityDescription),
+      suspectFullName: sanitizeName(formData.suspectFullName),
+      suspectEmail: formData.suspectEmail.trim(),
+      suspectDomicileAddress: sanitizeString(formData.suspectDomicileAddress),
+      suspectPhone: sanitizeString(formData.suspectPhone),
+      suspectJob: sanitizeString(formData.suspectJob),
+      suspectPlaceOfBirth: sanitizeString(formData.suspectPlaceOfBirth),
+      suspectEducation: sanitizeString(formData.suspectEducation)
+    };
+
+    console.log("Sanitized Data:", sanitizedData);
   };
 
   return (
@@ -86,15 +152,18 @@ const ReportForm: React.FC = () => {
         <div className="bg-gray-100 p-4 rounded-xl">
           <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">1. Identitas Pelapor</h3>
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="tel"
-              name="reporterPhone"
-              value={formData.reporterPhone}
-              onChange={handleInputChange}
-              placeholder="Nomor Telepon"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <input
+                type="tel"
+                name="reporterPhone"
+                value={formData.reporterPhone}
+                onChange={handleInputChange}
+                placeholder="Nomor Telepon"
+                className="w-full p-2 border rounded"
+                required
+              />
+              {errors.reporterPhone && <p className="text-red-500 text-sm mt-1">{errors.reporterPhone}</p>}
+            </div>
             <input
               type="text"
               name="reporterJob"
@@ -104,15 +173,18 @@ const ReportForm: React.FC = () => {
               className="w-full p-2 border rounded"
               required
             />
-            <input
-              type="date"
-              name="reporterDateOfBirth"
-              value={formData.reporterDateOfBirth}
-              onChange={handleInputChange}
-              placeholder="Tanggal Lahir"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <input
+                type="date"
+                name="reporterDateOfBirth"
+                value={formData.reporterDateOfBirth}
+                onChange={handleInputChange}
+                placeholder="Tanggal Lahir"
+                className="w-full p-2 border rounded"
+                required
+              />
+              {errors.reporterDateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.reporterDateOfBirth}</p>}
+            </div>
             <textarea
               name="reporterAddress"
               value={formData.reporterAddress}
@@ -159,15 +231,18 @@ const ReportForm: React.FC = () => {
               className="w-full p-2 border rounded"
               required
             />
-            <textarea
-              name="violationDescription"
-              value={formData.violationDescription}
-              onChange={handleInputChange}
-              placeholder="Deskripsi Pelanggaran"
-              className="w-full p-2 border rounded col-span-2"
-              rows={4}
-              required
-            />
+            <div className="col-span-2">
+              <textarea
+                name="violationDescription"
+                value={formData.violationDescription}
+                onChange={handleInputChange}
+                placeholder="Deskripsi Pelanggaran"
+                className="w-full p-2 border rounded"
+                rows={4}
+                required
+              />
+              {errors.violationDescription && <p className="text-red-500 text-sm mt-1">{errors.violationDescription}</p>}
+            </div>
             <input
               type="text"
               name="victimNeeds"
@@ -184,14 +259,17 @@ const ReportForm: React.FC = () => {
               className="w-full p-2 border rounded col-span-2"
               rows={3}
             />
-            <input
-              type="url"
-              name="evidenceLink"
-              value={formData.evidenceLink}
-              onChange={handleInputChange}
-              placeholder="Link Bukti"
-              className="w-full p-2 border rounded col-span-2"
-            />
+            <div className="col-span-2">
+              <input
+                type="url"
+                name="evidenceLink"
+                value={formData.evidenceLink}
+                onChange={handleInputChange}
+                placeholder="Link Bukti"
+                className="w-full p-2 border rounded"
+              />
+              {errors.evidenceLink && <p className="text-red-500 text-sm mt-1">{errors.evidenceLink}</p>}
+            </div>
           </div>
         </div>
 
@@ -217,15 +295,18 @@ const ReportForm: React.FC = () => {
               className="w-full p-2 border rounded"
               required
             />
-            <input
-              type="email"
-              name="victimEmail"
-              value={formData.victimEmail}
-              onChange={handleInputChange}
-              placeholder="Email"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <input
+                type="email"
+                name="victimEmail"
+                value={formData.victimEmail}
+                onChange={handleInputChange}
+                placeholder="Email"
+                className="w-full p-2 border rounded"
+                required
+              />
+              {/* Jika perlu validasi email, bisa tambahkan error field */}
+            </div>
             <textarea
               name="victimDomicileAddress"
               value={formData.victimDomicileAddress}
@@ -313,11 +394,18 @@ const ReportForm: React.FC = () => {
               required
             >
               <option value="">Pilih Status</option>
-              {Object.values(StatusPernikahan).map(relation => (
-                <option key={relation} value={relation}>{relation}</option>
+              {Object.values(StatusPernikahan).map(status => (
+                <option key={status} value={status}>{status}</option>
               ))}
             </select>
-
+            <input
+              type="text"
+              name="victimMarriageAge"
+              value={formData.victimMarriageAge}
+              onChange={handleInputChange}
+              placeholder="Usia Pernikahan"
+              className="w-full p-2 border rounded"
+            />
             <div className="col-span-2 flex items-center">
               <input
                 type="checkbox"
@@ -341,7 +429,7 @@ const ReportForm: React.FC = () => {
           </div>
         </div>
 
-        {/* 4. Terdakwa Section */}
+        {/* 4. Identitas Terdakwa Section */}
         <div className="bg-gray-100 p-4 rounded-xl">
           <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">4. Identitas Terdakwa</h3>
           <div className="grid grid-cols-2 gap-4">
