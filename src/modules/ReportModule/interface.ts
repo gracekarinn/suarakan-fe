@@ -59,7 +59,7 @@ export enum RelationshipType {
     victimOfficialAddress: string;
     victimEducation: string;
     victimFaxNumber: string;
-    victimMaritalStatus: string;
+    victimMarriageStatus: string;
     victimMarriageAge: string;
     victimSpecialNeeds: boolean;
     victimDisabilityDescription: string;
