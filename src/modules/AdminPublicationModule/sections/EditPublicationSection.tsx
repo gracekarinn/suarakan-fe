@@ -1,33 +1,51 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useContext, useEffect } from "react";
-import { usePublicationContext } from "@/context/PublicationContext";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+
 const EditPublicationSection = () => {
-  const params = useParams();
+  const { id } = useParams();
   const router = useRouter();
-  const { id } = params;
-  const { publications, updatePublication } = usePublicationContext();
-
-  const pub = publications.find((p) => p.id === Number(id));
-
   const [form, setForm] = useState({
     title: "",
     description: "",
-    fileLink: "",
+    filelink: "",
   });
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    if (pub) {
-      setForm({
-        title: pub.title,
-        description: pub.description,
-        fileLink: pub.fileLink,
-      });
-    }
-  }, [pub]);
+    const fetchPublication = async () => {
+      try {
+        const token = localStorage.getItem("access_token") || "";
+        const res = await fetch(`${BE_URL}/api/v1/publications/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("Gagal memuat data publikasi.");
+
+        const data = await res.json();
+        setForm({
+          title: data.title,
+          description: data.description,
+          filelink: data.filelink,
+        });
+      } catch (err) {
+        if (err instanceof Error) setError(err.message);
+        else setError("Terjadi kesalahan.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPublication();
+  }, [id]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -36,30 +54,40 @@ const EditPublicationSection = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pub) {
-      updatePublication({
-        ...pub,
-        title: form.title,
-        description: form.description,
-        fileLink: form.fileLink,
-        updatedAt: new Date().toISOString().split("T")[0],
+    try {
+      const token = localStorage.getItem("access_token") || "";
+      const res = await fetch(`${BE_URL}/api/v1/publications/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: form.title,
+          description: form.description,
+          filelink: form.filelink,
+          updatedat: new Date().toISOString().split("T")[0],
+        }),
       });
+
+      if (!res.ok) throw new Error("Gagal memperbarui publikasi.");
+
+      router.push("/admin/publication");
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Terjadi kesalahan saat menyimpan.");
     }
-    router.push("/admin/publication");
   };
 
-  if (!pub) {
-    return <div className="p-6">Publikasi tidak ditemukan.</div>;
-  }
+  if (loading) return <div className="p-6">Memuat data...</div>;
+  if (error) return <div className="p-6 text-red-500">{error}</div>;
 
   return (
     <div className="min-h-screen bg-white px-8 py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-orange-700">
-          Edit Publikasi Kasus Kekerasan Seksual
-        </h1>
+        <h1 className="text-3xl font-bold text-orange-700">Edit Publikasi</h1>
         <Link href="/admin/publication">
           <button className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-4 py-2 rounded-md">
             ← Kembali ke Dashboard
@@ -100,11 +128,11 @@ const EditPublicationSection = () => {
 
         <div>
           <label className="block font-semibold text-orange-800 mb-1">
-            Link File Publikasi
+            Tautan File Publikasi
           </label>
           <input
-            name="fileLink"
-            value={form.fileLink}
+            name="filelink"
+            value={form.filelink}
             onChange={handleChange}
             className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
             required
@@ -118,7 +146,6 @@ const EditPublicationSection = () => {
           >
             Simpan Perubahan
           </button>
-
           <Link href="/admin/publication">
             <button
               type="button"
