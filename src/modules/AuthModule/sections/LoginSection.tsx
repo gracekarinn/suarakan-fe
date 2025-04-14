@@ -4,7 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://kelompok-3-suarakan-auth.pkpl.cs.ui.ac.id";
+const API_BASE_URL = process.env.AUTH_URL ?? "http://localhost:8000";
 
 interface LoginFormData {
   email: string;
@@ -65,6 +65,12 @@ export default function LoginSection() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+        localStorage.setItem("user_id", JSON.stringify(data.user_id));
+        localStorage.setItem("user_role", data.user_role);
+
         setMessage({ type: "success", text: "Login berhasil. Mengarahkan..." });
       
         setTimeout(() => {

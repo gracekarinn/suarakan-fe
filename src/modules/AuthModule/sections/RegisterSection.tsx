@@ -3,7 +3,7 @@ import { useState, FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://kelompok-3-suarakan-auth.pkpl.cs.ui.ac.id";
+const API_BASE_URL = process.env.AUTH_URL ?? "http://localhost:8000";
 
 interface RegisterFormData {
   full_name: string;

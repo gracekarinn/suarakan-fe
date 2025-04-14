@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { usePublicationContext } from "@/context/PublicationContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+
 const CreatePublicationSection = () => {
-  const { addPublication, publications } = usePublicationContext();
   const router = useRouter();
 
   const [form, setForm] = useState({
@@ -22,20 +22,29 @@ const CreatePublicationSection = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newPublication = {
-      id: publications.length + 1,
-      title: form.title,
-      description: form.description,
-      fileLink: form.fileLink,
-      createdAt: new Date().toISOString().split("T")[0],
-      updatedAt: undefined,
-    };
+    try {
+      const response = await fetch(`${BE_URL}/api/v1/publications`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify(form),
+      });
 
-    addPublication(newPublication);
-    router.push("/admin/publication");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create publication");
+      }
+
+      router.push("/admin/publication");
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    }
   };
 
   return (

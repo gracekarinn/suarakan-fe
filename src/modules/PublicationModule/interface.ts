@@ -1,9 +1,9 @@
 export interface Publication {
-    id: number;
+    publicationid: number;
     title: string;
     description: string;
-    fileLink: string;
-    createdAt: string;
-    updatedAt?: string
+    filelink: string;
+    createdat: string;
+    updatedat?: string
   }
   
