@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { adminReports } from "../constant";
 import { AdminReport } from "../interface";
 import { isValidUUID, maskName } from "./utils";
 
@@ -16,6 +15,8 @@ reportId,
 const router = useRouter();
 
 const [reportData, setReportData] = useState<AdminReport | null>(null);
+const [loading, setLoading] = useState<boolean>(true);
+const [error, setError] = useState<string | null>(null);
 
 const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
 const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
@@ -23,27 +24,66 @@ const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
 const isDataValid = isValidUUID(reportId);
 
 useEffect(() => {
-    if (isDataValid) {
-    const foundReport = adminReports.find((r) => r.reportId === reportId);
-    if (foundReport) {
-        setReportData(foundReport);
-    }
-    }
+    const fetchReportDetail = async () => {
+        if (!isDataValid) {
+            setLoading(false);
+            return;
+        }
+        
+        try {
+            setLoading(true);
+            const response = await fetch(`http://localhost:3000/api/v1/reports/${reportId}`);
+            
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            setReportData(data);
+            setError(null);
+        } catch (err) {
+            setError(`Gagal mengambil data: ${err instanceof Error ? err.message : 'Unknown error'}`);
+            console.error("Error fetching report detail:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchReportDetail();
 }, [reportId, isDataValid]);
+
+if (loading) {
+    return (
+        <div className="min-h-screen bg-white p-6 md:p-10 flex justify-center items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-700"></div>
+        </div>
+    );
+}
 
 if (!isDataValid) {
     return (
-    <div className="min-h-screen bg-white p-6 md:p-10">
-        <p>Report ID tidak valid.</p>
-    </div>
+        <div className="min-h-screen bg-white p-6 md:p-10">
+            <p>Report ID tidak valid.</p>
+        </div>
+    );
+}
+
+if (error) {
+    return (
+        <div className="min-h-screen bg-white p-6 md:p-10">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong className="font-bold">Error!</strong>
+                <span className="block sm:inline"> {error}</span>
+            </div>
+        </div>
     );
 }
 
 if (!reportData) {
     return (
-    <div className="min-h-screen bg-white p-6 md:p-10">
-        <p>Data laporan tidak ditemukan.</p>
-    </div>
+        <div className="min-h-screen bg-white p-6 md:p-10">
+            <p>Data laporan tidak ditemukan.</p>
+        </div>
     );
 }
 
