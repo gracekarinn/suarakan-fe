@@ -9,21 +9,21 @@ import { sanitizeString, maskName } from "./utils";
 const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
 
 const formatDate = (isoString: string | null | undefined): string => {
-    if (!isoString) return "-";
-    const date = new Date(isoString);
-    const pad = (n: number) => n.toString().padStart(2, "0");
-  
-    const dd = pad(date.getDate());
-    const mm = pad(date.getMonth() + 1);
-    const yyyy = date.getFullYear();
-    const hh = pad(date.getHours());
-    const min = pad(date.getMinutes());
-    const ss = pad(date.getSeconds());
-  
-    return `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`;
-  };
-  
-export default function AdminReportSection() {
+  if (!isoString) return "-";
+  const date = new Date(isoString);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+
+  const dd = pad(date.getDate());
+  const mm = pad(date.getMonth() + 1);
+  const yyyy = date.getFullYear();
+  const hh = pad(date.getHours());
+  const min = pad(date.getMinutes());
+  const ss = pad(date.getSeconds());
+
+  return `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`;
+};
+
+export default function UpdateReportSection() {
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export default function AdminReportSection() {
       try {
         const token = localStorage.getItem("access_token");
         if (!token) throw new Error("Token tidak ditemukan.");
-  
+
         const response = await fetch(`${BE_URL}/api/v1/reports`, {
           method: "GET",
           headers: {
@@ -41,7 +41,7 @@ export default function AdminReportSection() {
           },
           credentials: "include",
         });
-  
+
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
             localStorage.removeItem("access_token");
@@ -49,16 +49,15 @@ export default function AdminReportSection() {
           }
           throw new Error(`Error: ${response.status}`);
         }
-  
+
         const rawData = await response.json();
-        const mappedData = rawData.map((item: any) => ({
+        const mappedData: AdminReport[] = rawData.map((item: any) => ({
           ...item.report,
-          status: item.update?.status ?? "received",
-          remarks: item.update?.remarks ?? "",
-          proof: item.update?.proof ?? "",
+          status: item.update?.status || "received",
+          remarks: item.update?.remarks || "",
+          proof: item.update?.proof || "",
         }));
-          
-  
+
         setReports(mappedData);
         setError(null);
       } catch (err) {
@@ -68,9 +67,10 @@ export default function AdminReportSection() {
         setLoading(false);
       }
     };
-  
+
     fetchReports();
   }, []);
+
   return (
     <div className="min-h-screen bg-white px-8 py-6">
       <h1 className="text-3xl font-bold text-orange-700 text-center mb-6">
@@ -94,47 +94,47 @@ export default function AdminReportSection() {
                 <th className="px-4 py-3 border">No.</th>
                 <th className="px-4 py-3 border text-left">Nama Pelapor</th>
                 <th className="px-4 py-3 border text-left">Deskripsi Insiden</th>
-                <th className="px-4 py-3 border">Tanggal Pelaporan</th>
-                <th className="px-4 py-3 border">Tanggal Update</th>
+                <th className="px-4 py-3 border">Tanggal Pembuatan Laporan</th>
+                <th className="px-4 py-3 border">Tanggal Update Laporan</th>
                 <th className="px-4 py-3 border text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
-                {reports.length > 0 ? (
-                    reports.map((report: AdminReport, index: number) => (
-                    <tr key={report.reportid ?? `report-${index}`} className="hover:bg-orange-50">
-                        <td className="px-4 py-2 text-center border">{index + 1}</td>
-                        <td className="px-4 py-2 border">{maskName(report.reporterfullname)}</td>
-                        <td className="px-4 py-2 border text-sm text-gray-700 max-w-xs">
-                        <div className="truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                            {report.incidentdescription
-                            ? sanitizeString(report.incidentdescription)
-                            : "-"}
-                        </div>
-                        </td>
-                        <td className="px-4 py-2 text-center border">{formatDate(report.createdat)}</td>
-                        <td className="px-4 py-2 text-center border">{formatDate(report.updatedat)}</td>
-                        <td className="px-4 py-2 text-center border space-x-2">
-                        <Link href={`/admin/report/${report.reportid}`}>
-                            <button className="p-2 bg-yellow-300 hover:bg-yellow-200 rounded">
-                            <Eye size={16} />
-                            </button>
-                        </Link>
-                        <Link href={`/admin/update/${report.reportid}`}>
-                            <button className="p-2 bg-yellow-300 hover:bg-blue-200 rounded">
-                            <Pencil size={16} />
-                            </button>
-                        </Link>
-                        </td>
-                    </tr>
-                    ))
-                ) : (
-                    <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
-                        Tidak ada laporan yang tersedia
+              {reports.length > 0 ? (
+                reports.map((report: AdminReport, index: number) => (
+                  <tr key={report.reportid ?? `report-${index}`} className="hover:bg-orange-50">
+                    <td className="px-4 py-2 text-center border">{index + 1}</td>
+                    <td className="px-4 py-2 border">{maskName(report.reporterfullname)}</td>
+                    <td className="px-4 py-2 border text-sm text-gray-700 max-w-xs">
+                      <div className="truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                        {report.incidentdescription
+                          ? sanitizeString(report.incidentdescription)
+                          : "-"}
+                      </div>
                     </td>
-                    </tr>
-                )}
+                    <td className="px-4 py-2 text-center border">{formatDate(report.createdat)}</td>
+                    <td className="px-4 py-2 text-center border">{formatDate(report.updatedat || null)}</td>
+                    <td className="px-4 py-2 text-center border space-x-2">
+                      <Link href={`/admin/report/${report.reportid}`}>
+                        <button className="p-2 bg-yellow-300 hover:bg-yellow-200 rounded">
+                          <Eye size={16} />
+                        </button>
+                      </Link>
+                      <Link href={`/admin/update/${report.reportid}`}>
+                        <button className="p-2 bg-yellow-300 hover:bg-blue-200 rounded">
+                          <Pencil size={16} />
+                        </button>
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                    Tidak ada laporan yang tersedia
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
