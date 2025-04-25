@@ -6,101 +6,139 @@ import Link from "next/link";
 import { AdminReport } from "../interface";
 import { sanitizeString, maskName } from "./utils";
 
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+
+const formatDate = (isoString: string | null | undefined): string => {
+    if (!isoString) return "-";
+    const date = new Date(isoString);
+    const pad = (n: number) => n.toString().padStart(2, "0");
+  
+    const dd = pad(date.getDate());
+    const mm = pad(date.getMonth() + 1);
+    const yyyy = date.getFullYear();
+    const hh = pad(date.getHours());
+    const min = pad(date.getMinutes());
+    const ss = pad(date.getSeconds());
+  
+    return `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`;
+  };
+  
 export default function AdminReportSection() {
-    const [reports, setReports] = useState<AdminReport[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+  const [reports, setReports] = useState<AdminReport[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchReports = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch('http://localhost:3000/api/v1/reports');
-                
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                setReports(data);
-                setError(null);
-            } catch (err) {
-                setError(`Gagal mengambil data: ${err instanceof Error ? err.message : 'Unknown error'}`);
-                console.error("Error fetching reports:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        if (!token) throw new Error("Token tidak ditemukan.");
+  
+        const response = await fetch(`${BE_URL}/api/v1/reports`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+          credentials: "include",
+        });
+  
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem("access_token");
+            throw new Error("Akses ditolak. Silakan login kembali.");
+          }
+          throw new Error(`Error: ${response.status}`);
+        }
+  
+        const rawData = await response.json();
+        const mappedData = rawData.map((item: any) => ({
+          ...item.report,
+          status: item.update?.status ?? "received",
+          remarks: item.update?.remarks ?? "",
+          proof: item.update?.proof ?? "",
+        }));
+          
+  
+        setReports(mappedData);
+        setError(null);
+      } catch (err) {
+        setError(`Gagal mengambil data: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        console.error("Error fetching reports:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchReports();
+  }, []);
+  return (
+    <div className="min-h-screen bg-white px-8 py-6">
+      <h1 className="text-3xl font-bold text-orange-700 text-center mb-6">
+        Laporan Kekerasan Seksual
+      </h1>
 
-        fetchReports();
-    }, []);
-
-    return (
-        <div className="min-h-screen bg-white px-8 py-6">
-            <h1 className="text-3xl font-bold text-orange-700 text-center mb-6">
-                Laporan Kekerasan Seksual
-            </h1>
-
-            {loading ? (
-                <div className="flex justify-center items-center py-8">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-700"></div>
-                </div>
-            ) : error ? (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <strong className="font-bold">Error!</strong>
-                    <span className="block sm:inline"> {error}</span>
-                </div>
-            ) : (
-                <div className="overflow-x-auto rounded-lg shadow">
-                    <table className="min-w-full bg-white border border-gray-200">
-                        <thead className="bg-orange-100 text-orange-800 text-sm font-semibold">
-                            <tr>
-                                <th className="px-4 py-3 border">No.</th>
-                                <th className="px-4 py-3 border text-left">Nama Pelapor</th>
-                                <th className="px-4 py-3 border text-left">Deskripsi Insiden</th>
-                                <th className="px-4 py-3 border">Tanggal Pelaporan</th>
-                                <th className="px-4 py-3 border text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {reports.length > 0 ? (
-                                reports.map((report: AdminReport, index: number) => (
-                                    <tr key={report.reportid} className="hover:bg-orange-50">
-                                        <td className="px-4 py-2 text-center border">{index + 1}</td>
-                                        <td className="px-4 py-2 border">{maskName(report.reporterfullname)}</td>
-                                        <td className="px-4 py-2 border text-sm text-gray-700 max-w-xs">
-                                            <div className="truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                                                {report.incidentdescription
-                                                    ? sanitizeString(report.incidentdescription)
-                                                    : "-"}
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-2 text-center border">{report.createdat}</td>
-                                        <td className="px-4 py-2 text-center border space-x-2">
-                                            <Link href={`/admin/report/${report.reportid}`}>
-                                                <button className="p-2 bg-yellow-300 hover:bg-yellow-200 rounded">
-                                                    <Eye size={16} />
-                                                </button>
-                                            </Link>
-                                            <Link href={`/admin/update/${report.reportid}`}>
-                                                <button className="p-2 bg-yellow-300 hover:bg-blue-200 rounded">
-                                                    <Pencil size={16} />
-                                                </button>
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
-                                        Tidak ada laporan yang tersedia
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+      {loading ? (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-700"></div>
         </div>
-    );
+      ) : error ? (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error!</strong>
+          <span className="block sm:inline"> {error}</span>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-lg shadow">
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead className="bg-orange-100 text-orange-800 text-sm font-semibold">
+              <tr>
+                <th className="px-4 py-3 border">No.</th>
+                <th className="px-4 py-3 border text-left">Nama Pelapor</th>
+                <th className="px-4 py-3 border text-left">Deskripsi Insiden</th>
+                <th className="px-4 py-3 border">Tanggal Pelaporan</th>
+                <th className="px-4 py-3 border">Tanggal Update</th>
+                <th className="px-4 py-3 border text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+                {reports.length > 0 ? (
+                    reports.map((report: AdminReport, index: number) => (
+                    <tr key={report.reportid ?? `report-${index}`} className="hover:bg-orange-50">
+                        <td className="px-4 py-2 text-center border">{index + 1}</td>
+                        <td className="px-4 py-2 border">{maskName(report.reporterfullname)}</td>
+                        <td className="px-4 py-2 border text-sm text-gray-700 max-w-xs">
+                        <div className="truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                            {report.incidentdescription
+                            ? sanitizeString(report.incidentdescription)
+                            : "-"}
+                        </div>
+                        </td>
+                        <td className="px-4 py-2 text-center border">{formatDate(report.createdat)}</td>
+                        <td className="px-4 py-2 text-center border">{formatDate(report.updatedat)}</td>
+                        <td className="px-4 py-2 text-center border space-x-2">
+                        <Link href={`/admin/report/${report.reportid}`}>
+                            <button className="p-2 bg-yellow-300 hover:bg-yellow-200 rounded">
+                            <Eye size={16} />
+                            </button>
+                        </Link>
+                        <Link href={`/admin/update/${report.reportid}`}>
+                            <button className="p-2 bg-yellow-300 hover:bg-blue-200 rounded">
+                            <Pencil size={16} />
+                            </button>
+                        </Link>
+                        </td>
+                    </tr>
+                    ))
+                ) : (
+                    <tr>
+                    <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
+                        Tidak ada laporan yang tersedia
+                    </td>
+                    </tr>
+                )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
 }
