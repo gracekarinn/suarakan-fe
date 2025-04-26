@@ -23,8 +23,14 @@ const formatDate = (isoString: string | null | undefined): string => {
   return `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`;
 };
 
+// Interface untuk menyimpan data tambahan yang tidak ada di AdminReport
+interface ExtendedReportData {
+  report: AdminReport;
+  updateId: number | null;
+}
+
 export default function UpdateReportSection() {
-  const [reports, setReports] = useState<AdminReport[]>([]);
+  const [reportsData, setReportsData] = useState<ExtendedReportData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,14 +57,18 @@ export default function UpdateReportSection() {
         }
 
         const rawData = await response.json();
-        const mappedData: AdminReport[] = rawData.map((item: any) => ({
-          ...item.report,
-          status: item.update?.status || "received",
-          remarks: item.update?.remarks || "",
-          proof: item.update?.proof || "",
+        // Mapping data dengan updateId disimpan terpisah
+        const mappedData: ExtendedReportData[] = rawData.map((item: any) => ({
+          report: {
+            ...item.report,
+            status: item.update?.status || "received",
+            remarks: item.update?.remarks || "",
+            proof: item.update?.proof || "",
+          },
+          updateId: item.update?.updateid || null,
         }));
 
-        setReports(mappedData);
+        setReportsData(mappedData);
         setError(null);
       } catch (err) {
         setError(`Gagal mengambil data: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -100,34 +110,37 @@ export default function UpdateReportSection() {
               </tr>
             </thead>
             <tbody>
-              {reports.length > 0 ? (
-                reports.map((report: AdminReport, index: number) => (
-                  <tr key={report.reportid ?? `report-${index}`} className="hover:bg-orange-50">
-                    <td className="px-4 py-2 text-center border">{index + 1}</td>
-                    <td className="px-4 py-2 border">{maskName(report.reporterfullname)}</td>
-                    <td className="px-4 py-2 border text-sm text-gray-700 max-w-xs">
-                      <div className="truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                        {report.incidentdescription
-                          ? sanitizeString(report.incidentdescription)
-                          : "-"}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 text-center border">{formatDate(report.createdat)}</td>
-                    <td className="px-4 py-2 text-center border">{formatDate(report.updatedat || null)}</td>
-                    <td className="px-4 py-2 text-center border space-x-2">
-                      <Link href={`/admin/report/${report.reportid}`}>
-                        <button className="p-2 bg-yellow-300 hover:bg-yellow-200 rounded">
-                          <Eye size={16} />
-                        </button>
-                      </Link>
-                      <Link href={`/admin/update/${report.reportid}`}>
-                        <button className="p-2 bg-yellow-300 hover:bg-blue-200 rounded">
-                          <Pencil size={16} />
-                        </button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))
+              {reportsData.length > 0 ? (
+                reportsData.map((reportData, index) => {
+                  const report = reportData.report;
+                  return (
+                    <tr key={report.reportid ?? `report-${index}`} className="hover:bg-orange-50">
+                      <td className="px-4 py-2 text-center border">{index + 1}</td>
+                      <td className="px-4 py-2 border">{maskName(report.reporterfullname)}</td>
+                      <td className="px-4 py-2 border text-sm text-gray-700 max-w-xs">
+                        <div className="truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                          {report.incidentdescription
+                            ? sanitizeString(report.incidentdescription)
+                            : "-"}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-center border">{formatDate(report.createdat)}</td>
+                      <td className="px-4 py-2 text-center border">{formatDate(report.updatedat || null)}</td>
+                      <td className="px-4 py-2 text-center border space-x-2">
+                        <Link href={`/admin/report/${report.reportid}`}>
+                          <button className="p-2 bg-yellow-300 hover:bg-yellow-200 rounded">
+                            <Eye size={16} />
+                          </button>
+                        </Link>
+                        <Link href={reportData.updateId ? `/admin/update/${reportData.updateId}` : `/admin/update/${report.reportid}`}>
+                          <button className="p-2 bg-yellow-300 hover:bg-blue-200 rounded">
+                            <Pencil size={16} />
+                          </button>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
