@@ -37,7 +37,7 @@ const ReportForm: React.FC = () => {
     victimsex: 'Laki-laki',
     victimdateofbirth: '',
     victimplaceofbirth: '',
-    victimeducationlevel: EducationLevel.Tidak_Sekolah,
+    victimeducationlevel: EducationLevel.SMA_MA_SMK_Sederajat,
     victimmarriagestatus: MarriageStatus.Belum_Kawin,
 
     // Terdakwa
@@ -79,7 +79,7 @@ const ReportForm: React.FC = () => {
     let newErrors: { [key: string]: string } = {};
 
     if (!validatePhone(formData.reporterphonenum)) {
-      newErrors.reporterphonenum = "Nomor telepon tidak valid. Harus terdiri dari 10-15 digit, dengan opsi '+' di awal.";
+      newErrors.reporterphonenum = "Nomor telepon tidak valid. Harus terdiri dari 8-13 digit numerik.";
     }
     if (!validateDescription(formData.incidentdescription)) {
       newErrors.incidentdescription = "Deskripsi pelanggaran harus minimal 10 karakter.";
@@ -92,6 +92,12 @@ const ReportForm: React.FC = () => {
     }
     if (!validateDate(formData.victimdateofbirth)) {
       newErrors.victimdateofbirth = "Tanggal lahir tidak valid.";
+    }
+    if (!validatePhone(formData.victimphonenum)) {
+      newErrors.victimphonenum = "Nomor telepon tidak valid. Harus terdiri dari 8-13 digit numerik.";
+    }
+    if (!validatePhone(formData.accusedphonenum)) {
+      newErrors.accusedphonenum = "Nomor telepon tidak valid. Harus terdiri dari 8-13 digit numerik.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -171,7 +177,7 @@ const ReportForm: React.FC = () => {
               className="w-full p-2 border rounded"
               required
             >
-              <option value="">Pilih Hubungan</option>
+              <option value="">Pilih Hubungan dengan Korban</option>
               {Object.values(Relationships).map(relation => (
                 <option key={relation} value={relation}>{relation}</option>
               ))}
@@ -278,15 +284,18 @@ const ReportForm: React.FC = () => {
               rows={2}
               required
             />
-            <input
-              type="tel"
-              name="victimphonenum"
-              value={formData.victimphonenum}
-              onChange={handleInputChange}
-              placeholder="Nomor Telepon"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <input
+                type="tel"
+                name="victimphonenum"
+                value={formData.victimphonenum}
+                onChange={handleInputChange}
+                placeholder="Nomor Telepon"
+                className="w-full p-2 border rounded"
+                required
+              />
+              {errors.victimphonenum && <p className="text-red-500 text-sm mt-1">{errors.victimphonenum}</p>}
+            </div>
             <input
               type="text"
               name="victimoccupation"
@@ -377,15 +386,18 @@ const ReportForm: React.FC = () => {
               rows={2}
               required
             />
-            <input
-              type="tel"
-              name="accusedphonenum"
-              value={formData.accusedphonenum}
-              onChange={handleInputChange}
-              placeholder="Nomor Telepon"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <input
+                type="tel"
+                name="accusedphonenum"
+                value={formData.accusedphonenum}
+                onChange={handleInputChange}
+                placeholder="Nomor Telepon"
+                className="w-full p-2 border rounded"
+                required
+              />
+              {errors.accusedphonenum && <p className="text-red-500 text-sm mt-1">{errors.accusedphonenum}</p>}
+            </div>
             <input
               type="text"
               name="accusedoccupation"
@@ -413,7 +425,7 @@ const ReportForm: React.FC = () => {
               className="w-full p-2 border rounded"
               required
             >
-              <option value="">Pilih Hubungan</option>
+              <option value="">Pilih Hubungan dengan Korban</option>
               {Object.values(Relationships).map(relation => (
                 <option key={relation} value={relation}>{relation}</option>
               ))}
@@ -423,7 +435,7 @@ const ReportForm: React.FC = () => {
 
         {/* 5. Level Pengaduan Section */}
         <div className="bg-gray-100 p-4 rounded-xl">
-          <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">5. Level Pengaduan</h3>
+          <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">5. Tujuan Pengaduan</h3>
           <div className="grid grid-cols-1 gap-4">
             <select
               name="authority"
@@ -432,9 +444,9 @@ const ReportForm: React.FC = () => {
               className="w-full p-2 border rounded"
               required
             >
-              <option value="">Pilih Level Pengaduan</option>
-              {Object.values(Authority).map(level => (
-                <option key={level} value={level}>{level}</option>
+              <option value="">Pilih Institusi yang Dituju</option>
+              {Object.values(Authority).map(auth => (
+                <option key={auth} value={auth}>{auth}</option>
               ))}
             </select>
           </div>

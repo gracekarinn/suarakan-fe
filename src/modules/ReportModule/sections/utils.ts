@@ -8,8 +8,9 @@ export function sanitizeString(input: string): string {
 }
 
 export function validatePhone(phone: string): boolean {
-    const phoneRegex = /^\+?\d{10,15}$/;
-    return phoneRegex.test(phone.trim());
+    const cleanedPhone = phone.trim().replace(/\s/g, '');
+    const phoneRegex = /^\d{8,13}$/;
+    return phoneRegex.test(cleanedPhone);
 }
 
 export function validateEmail(email: string): boolean {
