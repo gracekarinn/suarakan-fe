@@ -43,14 +43,14 @@
   }
   
   export interface ReportFormState {
-    // Identitas Pelapor
+    // REPORTER
     reporterfullname: string;
     reporterphonenum: string;
     reporteraddress: string;
     reporterrelationship: Relationships;
 
   
-    // Informasi Pelanggaran
+    // INCIDENT
     incidentlocation: string;
     incidenttime: string;
     incidentdescription: string;
@@ -58,7 +58,7 @@
     incidentproof: string;
     
 
-    // Identitas Korban
+    // VICTIM
     victimfullname: string;
     victimnik: string;
     victimemail: string;
@@ -72,7 +72,7 @@
     victimmarriagestatus: MarriageStatus;
   
 
-    // Terdakwa
+    // ACCUSED
     accusedfullname: string;
     accusedaddress: string;
     accusedphonenum: string;
@@ -80,6 +80,6 @@
     accusedsex:  'Laki-laki' | 'Perempuan' | 'Lainnya';
     accusedrelationship: Relationships;
   
-    // Level Pengaduan
+    // AUTHORITY
     authority: Authority;
   }
