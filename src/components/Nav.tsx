@@ -96,7 +96,7 @@ const Nav = () => {
               <span>{localStorage.getItem("user_role") === 'ADMIN' ? 'Admin' : userData?.email}</span>
               <button
                 onClick={handleLogout}
-                className="bg-white text-primary hover:bg-gray-300 px-3 py-1 rounded text-sm"
+                className="bg-white text-primary hover:bg-gray-300 px-3 py-1 rounded text-sm cursor-pointer"
                 style={{ color: 'var(--primary-color)' }}
               >
                 Logout

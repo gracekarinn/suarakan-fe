@@ -1,61 +1,64 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ReportFormState, RelationshipType, ReportingLevel, StatusPernikahan } from '../interface';
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ReportFormState, Relationships, MarriageStatus, EducationLevel, Authority } from '../interface';
 import {
   sanitizeString,
   sanitizeName,
   validatePhone,
   validateEmail,
   validateUrl,
-  validateDate,
-  validateDescription
+  validateDescription,
+  validateNIK,
+  formatDateForBackend
 } from './utils';
 
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+
 const ReportForm: React.FC = () => {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<ReportFormState>({
-    reporterPhone: '',
-    reporterJob: '',
-    reporterDateOfBirth: '',
-    reporterAddress: '',
-    reporterRelationship: RelationshipType.Friend,
+    // REPORTER
+    reporterfullname: '',
+    reporterphonenum: '',
+    reporteraddress: '',
+    reporterrelationship: Relationships.Teman,
+  
+    // INCIDENT
+    incidentlocation: '',
+    incidenttime: '',
+    incidentdescription: '',
+    incidentvictimneeds: '',
+    incidentproof: '',
+    
+    // VICTIM
+    victimfullname: '',
+    victimnik: '',
+    victimemail: '',
+    victimaddress: '',
+    victimphonenum: '',
+    victimoccupation: '',
+    victimsex: 'Laki-laki',
+    victimdateofbirth: '',
+    victimplaceofbirth: '',
+    victimeducationlevel: EducationLevel.SMA_MA_SMK_Sederajat,
+    victimmarriagestatus: MarriageStatus.Belum_Kawin,
 
-    violationLocation: '',
-    violationTime: '',
-    violationDescription: '',
-    victimNeeds: [],
-    pastEffort: '',
-    evidenceLink: '',
-
-    victimFullName: '',
-    victimNIK: '',
-    victimEmail: '',
-    victimDomicileAddress: '',
-    victimPhone: '',
-    victimJob: '',
-    victimGender: 'laki-laki',
-    victimDateOfBirth: '',
-    victimPlaceOfBirth: '',
-    victimOfficialAddress: '',
-    victimEducation: '',
-    victimFaxNumber: '',
-    victimMarriageStatus: StatusPernikahan.BelumKawin,
-    victimMarriageAge: '',
-    victimSpecialNeeds: false,
-    victimDisabilityDescription: '',
-
-    suspectFullName: '',
-    suspectEmail: '',
-    suspectDomicileAddress: '',
-    suspectPhone: '',
-    suspectJob: '',
-    suspectGender: 'laki-laki',
-    suspectDateOfBirth: '',
-    suspectPlaceOfBirth: '',
-    suspectEducation: '',
-    suspectRelationship: RelationshipType.Friend,
-
-    reportingLevel: ReportingLevel.UniversitasIndonesia
+    // ACCUSED
+    accusedfullname: '',
+    accusedaddress: '',
+    accusedphonenum: '',
+    accusedoccupation: '',
+    accusedsex: 'Laki-laki',
+    accusedrelationship: Relationships.Teman,
+  
+    // AUTHORITY 
+    authority: Authority.Universitas_Indonesia
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -70,11 +73,6 @@ const ReportForm: React.FC = () => {
         ...prev,
         [name]: (e.target as HTMLInputElement).checked
       }));
-    } else if (name === 'victimNeeds') {
-      setFormData(prev => ({
-        ...prev,
-        victimNeeds: value.split(',').map(need => need.trim())
-      }));
     } else {
       setFormData(prev => ({
         ...prev,
@@ -83,126 +81,195 @@ const ReportForm: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-
+  const validateForm = (): { [key: string]: string } => {
     let newErrors: { [key: string]: string } = {};
 
-    if (!validatePhone(formData.reporterPhone)) {
-      newErrors.reporterPhone = "Nomor telepon tidak valid. Harus terdiri dari 10-15 digit, dengan opsi '+' di awal.";
+    if (!formData.incidentlocation.trim()) {
+      newErrors.incidentlocation = "Lokasi insiden harus diisi!";
     }
-    if (!validateDate(formData.reporterDateOfBirth)) {
-      newErrors.reporterDateOfBirth = "Tanggal lahir tidak valid.";
+    if (!formData.victimfullname.trim()) {
+      newErrors.victimfullname = "Nama korban harus diisi!";
     }
-    if (!validateDescription(formData.violationDescription)) {
-      newErrors.violationDescription = "Deskripsi pelanggaran harus minimal 10 karakter.";
+    if (!formData.accusedfullname.trim()) {
+      newErrors.accusedfullname = "Nama pelaku harus diisi!";
     }
-    if (!validateEmail(formData.victimEmail)) {
-      newErrors.victimEmail = "Email korban tidak valid.";
+    if (!formData.authority.trim()) {
+      newErrors.authority = "Tujuan pengaduan harus diisi!";
     }
-    if (formData.evidenceLink && !validateUrl(formData.evidenceLink)) {
-      newErrors.evidenceLink = "Link bukti tidak valid.";
+    if (!formData.incidenttime) {
+      newErrors.incidenttime = "Waktu insiden harus diisi!";
+    }
+    if (!formData.incidentproof) {
+      newErrors.incidentproof = "Link bukti harus diisi!";
     }
 
+    // VALIDASI
+    if (formData.reporterphonenum && !validatePhone(formData.reporterphonenum)) {
+      newErrors.reporterphonenum = "Nomor telepon tidak valid. Harus terdiri dari 8-13 digit numerik.";
+    }
+    if (!validateDescription(formData.incidentdescription)) {
+      newErrors.incidentdescription = "Deskripsi pelanggaran harus minimal 10 karakter.";
+    }
+    if (formData.victimemail && !validateEmail(formData.victimemail)) {
+      newErrors.victimemail = "Email korban tidak valid.";
+    }
+    if (formData.incidentproof && !validateUrl(formData.incidentproof)) {
+      newErrors.incidentproof = "Link bukti tidak valid.";
+    }
+    if (formData.victimnik && !validateNIK(formData.victimnik)) {
+      newErrors.victimnik = "NIK harus terdiri dari 16 digit numerik.";
+    }
+    if (formData.victimphonenum && !validatePhone(formData.victimphonenum)) {
+      newErrors.victimphonenum = "Nomor telepon tidak valid. Harus terdiri dari 8-13 digit numerik.";
+    }
+    if (formData.accusedphonenum && !validatePhone(formData.accusedphonenum)) {
+      newErrors.accusedphonenum = "Nomor telepon tidak valid. Harus terdiri dari 8-13 digit numerik.";
+    }
+
+    return newErrors;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors = validateForm();
+    setErrors(newErrors);
+
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
       return;
     }
 
-    const sanitizedData: ReportFormState = {
-      ...formData,
-      reporterPhone: sanitizeString(formData.reporterPhone),
-      reporterJob: sanitizeString(formData.reporterJob),
-      reporterAddress: sanitizeString(formData.reporterAddress),
-      violationLocation: sanitizeString(formData.violationLocation),
-      violationDescription: sanitizeString(formData.violationDescription),
-      pastEffort: sanitizeString(formData.pastEffort),
-      evidenceLink: sanitizeString(formData.evidenceLink),
-      victimFullName: sanitizeName(formData.victimFullName),
-      victimNIK: sanitizeString(formData.victimNIK),
-      victimEmail: formData.victimEmail.trim(),
-      victimDomicileAddress: sanitizeString(formData.victimDomicileAddress),
-      victimPhone: sanitizeString(formData.victimPhone),
-      victimJob: sanitizeString(formData.victimJob),
-      victimPlaceOfBirth: sanitizeString(formData.victimPlaceOfBirth),
-      victimOfficialAddress: sanitizeString(formData.victimOfficialAddress),
-      victimEducation: sanitizeString(formData.victimEducation),
-      victimFaxNumber: sanitizeString(formData.victimFaxNumber),
-      victimMarriageAge: sanitizeString(formData.victimMarriageAge),
-      victimDisabilityDescription: sanitizeString(formData.victimDisabilityDescription),
-      suspectFullName: sanitizeName(formData.suspectFullName),
-      suspectEmail: formData.suspectEmail.trim(),
-      suspectDomicileAddress: sanitizeString(formData.suspectDomicileAddress),
-      suspectPhone: sanitizeString(formData.suspectPhone),
-      suspectJob: sanitizeString(formData.suspectJob),
-      suspectPlaceOfBirth: sanitizeString(formData.suspectPlaceOfBirth),
-      suspectEducation: sanitizeString(formData.suspectEducation)
-    };
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-    console.log("Sanitized Data:", sanitizedData);
+    try {
+      // FORMAT DATA KE BACKEND
+      const formattedData = {
+        reporterfullname: formData.reporterfullname || null,
+        reporterphonenum: formData.reporterphonenum || null,
+        reporteraddress: formData.reporteraddress || null,
+        reporterrelationship: formData.reporterrelationship || null,
+        
+        incidentlocation: formData.incidentlocation,
+        // FORMAT DATA NaiveDateTime
+        incidenttime: new Date(formData.incidenttime).toISOString().slice(0, 19),
+        incidentdescription: formData.incidentdescription || null,
+        incidentvictimneeds: formData.incidentvictimneeds || null,
+        incidentproof: formData.incidentproof || null,
+        
+        victimfullname: formData.victimfullname,
+        victimnik: formData.victimnik || null,
+        victimemail: formData.victimemail || null,
+        victimaddress: formData.victimaddress || null,
+        victimphonenum: formData.victimphonenum || null,
+        victimoccupation: formData.victimoccupation || null,
+        victimsex: formData.victimsex || null,
+        // FORMAT DATA NaiveDate
+        victimdateofbirth: formData.victimdateofbirth ? formatDateForBackend(formData.victimdateofbirth) : null,
+        victimplaceofbirth: formData.victimplaceofbirth || null,
+        victimeducationlevel: formData.victimeducationlevel || null,
+        victimmarriagestatus: formData.victimmarriagestatus || null,
+        
+        accusedfullname: formData.accusedfullname,
+        accusedaddress: formData.accusedaddress || null,
+        accusedphonenum: formData.accusedphonenum || null,
+        accusedoccupation: formData.accusedoccupation || null,
+        accusedsex: formData.accusedsex || null,
+        accusedrelationship: formData.accusedrelationship || null,
+        
+        authority: formData.authority
+      };
+
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        setSubmitError('Anda harus login terlebih dahulu');
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch(`${BE_URL}/api/v1/reports`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formattedData)
+      });
+
+      let data;
+      const contentType = response.headers.get("Content-Type") || "";
+      
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(text || 'Server tidak merespons dengan data JSON');
+      }
+      
+      if (!response.ok) {
+        throw new Error(data?.error || 'Terjadi kesalahan saat mengirim laporan');
+      }
+      
+
+      alert('Laporan berhasil dikirim!');
+      router.push('/');
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      setSubmitError(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengirim laporan');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow-md rounded-xl">
       <h2 className="text-3xl font-bold text-[#8B322C] mb-6 text-center">Formulir Pengaduan</h2>
       
+      {submitError && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-300 rounded">
+          {submitError}
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 1. Identitas Pelapor Section */}
         <div className="bg-gray-100 p-4 rounded-xl">
           <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">1. Identitas Pelapor</h3>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <input
-                type="tel"
-                name="reporterPhone"
-                value={formData.reporterPhone}
-                onChange={handleInputChange}
-                placeholder="Nomor Telepon"
-                className="w-full p-2 border rounded"
-                required
-              />
-              {errors.reporterPhone && <p className="text-red-500 text-sm mt-1">{errors.reporterPhone}</p>}
-            </div>
             <input
               type="text"
-              name="reporterJob"
-              value={formData.reporterJob}
+              name="reporterfullname"
+              value={formData.reporterfullname}
               onChange={handleInputChange}
-              placeholder="Pekerjaan"
+              placeholder="Nama Lengkap"
               className="w-full p-2 border rounded"
-              required
             />
             <div>
               <input
-                type="date"
-                name="reporterDateOfBirth"
-                value={formData.reporterDateOfBirth}
+                type="tel"
+                name="reporterphonenum"
+                value={formData.reporterphonenum}
                 onChange={handleInputChange}
-                placeholder="Tanggal Lahir"
+                placeholder="Nomor Telepon"
                 className="w-full p-2 border rounded"
-                required
               />
-              {errors.reporterDateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.reporterDateOfBirth}</p>}
+              {errors.reporterphonenum && <p className="text-red-500 text-sm mt-1">{errors.reporterphonenum}</p>}
             </div>
             <textarea
-              name="reporterAddress"
-              value={formData.reporterAddress}
+              name="reporteraddress"
+              value={formData.reporteraddress}
               onChange={handleInputChange}
               placeholder="Alamat"
               className="w-full p-2 border rounded col-span-2"
               rows={3}
-              required
             />
             <select
-              name="reporterRelationship"
-              value={formData.reporterRelationship}
+              name="reporterrelationship"
+              value={formData.reporterrelationship}
               onChange={handleInputChange}
               className="w-full p-2 border rounded"
-              required
             >
-              <option value="">Pilih Hubungan</option>
-              {Object.values(RelationshipType).map(relation => (
+              <option value="">Pilih Hubungan dengan Korban</option>
+              {Object.values(Relationships).map(relation => (
                 <option key={relation} value={relation}>{relation}</option>
               ))}
             </select>
@@ -213,62 +280,61 @@ const ReportForm: React.FC = () => {
         <div className="bg-gray-100 p-4 rounded-xl">
           <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">2. Informasi Pelanggaran</h3>
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="violationLocation"
-              value={formData.violationLocation}
-              onChange={handleInputChange}
-              placeholder="Lokasi"
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              type="datetime-local"
-              name="violationTime"
-              value={formData.violationTime}
-              onChange={handleInputChange}
-              placeholder="Waktu"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <input
+                type="text"
+                name="incidentlocation"
+                value={formData.incidentlocation}
+                onChange={handleInputChange}
+                placeholder="Lokasi"
+                className={`w-full p-2 border rounded ${errors.incidentlocation ? 'border-red-500' : ''}`}
+                required
+              />
+              {errors.incidentlocation && <p className="text-red-500 text-sm mt-1">{errors.incidentlocation}</p>}
+            </div>
+            <div>
+              <input
+                type="datetime-local"
+                name="incidenttime"
+                value={formData.incidenttime}
+                onChange={handleInputChange}
+                placeholder="Waktu"
+                className={`w-full p-2 border rounded ${errors.incidenttime ? 'border-red-500' : ''}`}
+                required
+              />
+              {errors.incidenttime && <p className="text-red-500 text-sm mt-1">{errors.incidenttime}</p>}
+            </div>
             <div className="col-span-2">
               <textarea
-                name="violationDescription"
-                value={formData.violationDescription}
+                name="incidentdescription"
+                value={formData.incidentdescription}
                 onChange={handleInputChange}
                 placeholder="Deskripsi Pelanggaran"
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${errors.incidentdescription ? 'border-red-500' : ''}`}
                 rows={4}
                 required
               />
-              {errors.violationDescription && <p className="text-red-500 text-sm mt-1">{errors.violationDescription}</p>}
+              {errors.incidentdescription && <p className="text-red-500 text-sm mt-1">{errors.incidentdescription}</p>}
             </div>
             <input
               type="text"
-              name="victimNeeds"
-              value={formData.victimNeeds.join(', ')}
+              name="incidentvictimneeds"
+              value={formData.incidentvictimneeds}
               onChange={handleInputChange}
-              placeholder="Kebutuhan Korban (pisahkan dengan koma)"
+              placeholder="Kebutuhan Korban"
               className="w-full p-2 border rounded col-span-2"
-            />
-            <textarea
-              name="pastEffort"
-              value={formData.pastEffort}
-              onChange={handleInputChange}
-              placeholder="Upaya yang Telah Dilakukan"
-              className="w-full p-2 border rounded col-span-2"
-              rows={3}
             />
             <div className="col-span-2">
               <input
                 type="url"
-                name="evidenceLink"
-                value={formData.evidenceLink}
+                name="incidentproof"
+                value={formData.incidentproof}
                 onChange={handleInputChange}
                 placeholder="Link Bukti"
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${errors.incidentproof ? 'border-red-500' : ''}`}
+                required
               />
-              {errors.evidenceLink && <p className="text-red-500 text-sm mt-1">{errors.evidenceLink}</p>}
+              {errors.incidentproof && <p className="text-red-500 text-sm mt-1">{errors.incidentproof}</p>}
             </div>
           </div>
         </div>
@@ -277,155 +343,119 @@ const ReportForm: React.FC = () => {
         <div className="bg-gray-100 p-4 rounded-xl">
           <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">3. Identitas Korban</h3>
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="victimFullName"
-              value={formData.victimFullName}
-              onChange={handleInputChange}
-              placeholder="Nama Lengkap"
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              type="text"
-              name="victimNIK"
-              value={formData.victimNIK}
-              onChange={handleInputChange}
-              placeholder="NIK"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <input
+                type="text"
+                name="victimfullname"
+                value={formData.victimfullname}
+                onChange={handleInputChange}
+                placeholder="Nama Lengkap"
+                className={`w-full p-2 border rounded ${errors.victimfullname ? 'border-red-500' : ''}`}
+                required
+              />
+              {errors.victimfullname && <p className="text-red-500 text-sm mt-1">{errors.victimfullname}</p>}
+            </div>
+            <div>
+              <input
+                type="text"
+                name="victimnik"
+                value={formData.victimnik}
+                onChange={handleInputChange}
+                placeholder="NIK"
+                className={`w-full p-2 border rounded ${errors.victimnik ? 'border-red-500' : ''}`}
+              />
+              {errors.victimnik && <p className="text-red-500 text-sm mt-1">{errors.victimnik}</p>}
+            </div>
             <div>
               <input
                 type="email"
-                name="victimEmail"
-                value={formData.victimEmail}
+                name="victimemail"
+                value={formData.victimemail}
                 onChange={handleInputChange}
                 placeholder="Email"
-                className="w-full p-2 border rounded"
-                required
+                className={`w-full p-2 border rounded ${errors.victimemail ? 'border-red-500' : ''}`}
               />
-              {/* Jika perlu validasi email, bisa tambahkan error field */}
+              {errors.victimemail && <p className="text-red-500 text-sm mt-1">{errors.victimemail}</p>}
             </div>
             <textarea
-              name="victimDomicileAddress"
-              value={formData.victimDomicileAddress}
+              name="victimaddress"
+              value={formData.victimaddress}
               onChange={handleInputChange}
               placeholder="Alamat Domisili"
               className="w-full p-2 border rounded"
               rows={2}
-              required
             />
-            <input
-              type="tel"
-              name="victimPhone"
-              value={formData.victimPhone}
-              onChange={handleInputChange}
-              placeholder="Nomor Telepon"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <input
+                type="tel"
+                name="victimphonenum"
+                value={formData.victimphonenum}
+                onChange={handleInputChange}
+                placeholder="Nomor Telepon"
+                className={`w-full p-2 border rounded ${errors.victimphonenum ? 'border-red-500' : ''}`}
+              />
+              {errors.victimphonenum && <p className="text-red-500 text-sm mt-1">{errors.victimphonenum}</p>}
+            </div>
             <input
               type="text"
-              name="victimJob"
-              value={formData.victimJob}
+              name="victimoccupation"
+              value={formData.victimoccupation}
               onChange={handleInputChange}
               placeholder="Pekerjaan"
               className="w-full p-2 border rounded"
             />
             <select
-              name="victimGender"
-              value={formData.victimGender}
+              name="victimsex"
+              value={formData.victimsex}
               onChange={handleInputChange}
               className="w-full p-2 border rounded"
               required
             >
               <option value="">Pilih Jenis Kelamin</option>
-              <option value="laki-laki">Laki-laki</option>
-              <option value="perempuan">Perempuan</option>
+              <option value="Laki-laki">Laki-laki</option>
+              <option value="Perempuan">Perempuan</option>
+              <option value="Lainnya">Lainnya</option>
             </select>
-            <input
-              type="date"
-              name="victimDateOfBirth"
-              value={formData.victimDateOfBirth}
-              onChange={handleInputChange}
-              placeholder="Tanggal Lahir"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <input
+                type="date"
+                name="victimdateofbirth"
+                value={formData.victimdateofbirth}
+                onChange={handleInputChange}
+                placeholder="Tanggal Lahir"
+                className="w-full p-2 border rounded"
+              />
+            </div>
             <input
               type="text"
-              name="victimPlaceOfBirth"
-              value={formData.victimPlaceOfBirth}
+              name="victimplaceofbirth"
+              value={formData.victimplaceofbirth}
               onChange={handleInputChange}
               placeholder="Tempat Lahir"
               className="w-full p-2 border rounded"
-              required
-            />
-            <textarea
-              name="victimOfficialAddress"
-              value={formData.victimOfficialAddress}
-              onChange={handleInputChange}
-              placeholder="Alamat Resmi"
-              className="w-full p-2 border rounded"
-              rows={2}
-            />
-            <input
-              type="text"
-              name="victimEducation"
-              value={formData.victimEducation}
-              onChange={handleInputChange}
-              placeholder="Pendidikan"
-              className="w-full p-2 border rounded"
-            />
-            <input
-              type="tel"
-              name="victimFaxNumber"
-              value={formData.victimFaxNumber}
-              onChange={handleInputChange}
-              placeholder="Nomor Fax"
-              className="w-full p-2 border rounded"
             />
             <select
-              name="victimMarriageStatus"
-              value={formData.victimMarriageStatus}
+              name="victimeducationlevel"
+              value={formData.victimeducationlevel}
               onChange={handleInputChange}
               className="w-full p-2 border rounded"
-              required
             >
-              <option value="">Pilih Status</option>
-              {Object.values(StatusPernikahan).map(status => (
+              <option value="">Pilih Pendidikan</option>
+              {Object.values(EducationLevel).map(level => (
+                <option key={level} value={level}>{level}</option>
+              ))}
+            </select>
+            <select
+              name="victimmarriagestatus"
+              value={formData.victimmarriagestatus}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+            >
+              <option value="">Pilih Status Pernikahan</option>
+              {Object.values(MarriageStatus).map(status => (
                 <option key={status} value={status}>{status}</option>
               ))}
             </select>
-            <input
-              type="text"
-              name="victimMarriageAge"
-              value={formData.victimMarriageAge}
-              onChange={handleInputChange}
-              placeholder="Usia Pernikahan"
-              className="w-full p-2 border rounded"
-            />
-            <div className="col-span-2 flex items-center">
-              <input
-                type="checkbox"
-                name="victimSpecialNeeds"
-                checked={formData.victimSpecialNeeds}
-                onChange={handleInputChange}
-                className="mr-2"
-              />
-              <label>Berkebutuhan Khusus</label>
-            </div>
-            {formData.victimSpecialNeeds && (
-              <textarea
-                name="victimDisabilityDescription"
-                value={formData.victimDisabilityDescription}
-                onChange={handleInputChange}
-                placeholder="Deskripsi Disabilitas"
-                className="w-full p-2 border rounded col-span-2"
-                rows={2}
-              />
-            )}
           </div>
         </div>
 
@@ -433,95 +463,65 @@ const ReportForm: React.FC = () => {
         <div className="bg-gray-100 p-4 rounded-xl">
           <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">4. Identitas Terdakwa</h3>
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="suspectFullName"
-              value={formData.suspectFullName}
-              onChange={handleInputChange}
-              placeholder="Nama Lengkap"
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              type="email"
-              name="suspectEmail"
-              value={formData.suspectEmail}
-              onChange={handleInputChange}
-              placeholder="Email"
-              className="w-full p-2 border rounded"
-            />
+            <div>
+              <input
+                type="text"
+                name="accusedfullname"
+                value={formData.accusedfullname}
+                onChange={handleInputChange}
+                placeholder="Nama Lengkap"
+                className={`w-full p-2 border rounded ${errors.accusedfullname ? 'border-red-500' : ''}`}
+                required
+              />
+              {errors.accusedfullname && <p className="text-red-500 text-sm mt-1">{errors.accusedfullname}</p>}
+            </div>
             <textarea
-              name="suspectDomicileAddress"
-              value={formData.suspectDomicileAddress}
+              name="accusedaddress"
+              value={formData.accusedaddress}
               onChange={handleInputChange}
               placeholder="Alamat Domisili"
-              className="w-full p-2 border rounded col-span-2"
-              rows={2}
-              required
-            />
-            <input
-              type="tel"
-              name="suspectPhone"
-              value={formData.suspectPhone}
-              onChange={handleInputChange}
-              placeholder="Nomor Telepon"
               className="w-full p-2 border rounded"
-              required
+              rows={2}
             />
+            <div>
+              <input
+                type="tel"
+                name="accusedphonenum"
+                value={formData.accusedphonenum}
+                onChange={handleInputChange}
+                placeholder="Nomor Telepon"
+                className={`w-full p-2 border rounded ${errors.accusedphonenum ? 'border-red-500' : ''}`}
+              />
+              {errors.accusedphonenum && <p className="text-red-500 text-sm mt-1">{errors.accusedphonenum}</p>}
+            </div>
             <input
               type="text"
-              name="suspectJob"
-              value={formData.suspectJob}
+              name="accusedoccupation"
+              value={formData.accusedoccupation}
               onChange={handleInputChange}
               placeholder="Pekerjaan"
               className="w-full p-2 border rounded"
             />
             <select
-              name="suspectGender"
-              value={formData.suspectGender}
+              name="accusedsex"
+              value={formData.accusedsex}
               onChange={handleInputChange}
               className="w-full p-2 border rounded"
               required
             >
               <option value="">Pilih Jenis Kelamin</option>
-              <option value="laki-laki">Laki-laki</option>
-              <option value="perempuan">Perempuan</option>
+              <option value="Laki-laki">Laki-laki</option>
+              <option value="Perempuan">Perempuan</option>
+              <option value="Lainnya">Lainnya</option>
             </select>
-            <input
-              type="date"
-              name="suspectDateOfBirth"
-              value={formData.suspectDateOfBirth}
-              onChange={handleInputChange}
-              placeholder="Tanggal Lahir"
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              type="text"
-              name="suspectPlaceOfBirth"
-              value={formData.suspectPlaceOfBirth}
-              onChange={handleInputChange}
-              placeholder="Tempat Lahir"
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              type="text"
-              name="suspectEducation"
-              value={formData.suspectEducation}
-              onChange={handleInputChange}
-              placeholder="Pendidikan"
-              className="w-full p-2 border rounded"
-            />
             <select
-              name="suspectRelationship"
-              value={formData.suspectRelationship}
+              name="accusedrelationship"
+              value={formData.accusedrelationship}
               onChange={handleInputChange}
               className="w-full p-2 border rounded"
-              required
             >
-              <option value="">Pilih Hubungan</option>
-              {Object.values(RelationshipType).map(relation => (
+              <option value="">Pilih Hubungan dengan Korban</option>
+              {Object.values(Relationships).map(relation => (
                 <option key={relation} value={relation}>{relation}</option>
               ))}
             </select>
@@ -530,28 +530,32 @@ const ReportForm: React.FC = () => {
 
         {/* 5. Level Pengaduan Section */}
         <div className="bg-gray-100 p-4 rounded-xl">
-          <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">5. Level Pengaduan</h3>
+          <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">5. Tujuan Pengaduan</h3>
           <div className="grid grid-cols-1 gap-4">
-            <select
-              name="reportingLevel"
-              value={formData.reportingLevel}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              required
-            >
-              <option value="">Pilih Level Pengaduan</option>
-              {Object.values(ReportingLevel).map(level => (
-                <option key={level} value={level}>{level}</option>
-              ))}
-            </select>
+            <div>
+              <select
+                name="authority"
+                value={formData.authority}
+                onChange={handleInputChange}
+                className={`w-full p-2 border rounded ${errors.authority ? 'border-red-500' : ''}`}
+                required
+              >
+                <option value="">Pilih Institusi yang Dituju</option>
+                {Object.values(Authority).map(auth => (
+                  <option key={auth} value={auth}>{auth}</option>
+                ))}
+              </select>
+              {errors.authority && <p className="text-red-500 text-sm mt-1">{errors.authority}</p>}
+            </div>
           </div>
         </div>
 
         <button 
           type="submit" 
-          className="w-full bg-[#DD5746] text-white px-6 py-3 rounded-xl hover:bg-[#C04737] transition-colors"
+          className="w-full bg-[#DD5746] text-white px-6 py-3 rounded-xl hover:bg-[#C04737] transition-colors disabled:bg-gray-400"
+          disabled={isSubmitting}
         >
-          Kirim Laporan
+          {isSubmitting ? 'Mengirim...' : 'Kirim Laporan'}
         </button>
       </form>
     </div>
