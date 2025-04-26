@@ -78,12 +78,12 @@ export default function ProgressSection() {
     
     return (
       <div className="flex mt-4 gap-2">
-        <Link href={`/reporter/detail/${reportId}`} className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+        <Link href={`/report/${reportId}`} className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
           Lihat Detail
         </Link>
 
         {canEditReport(status) && (
-          <Link href={`/reporter/edit/${reportId}`} className="px-3 py-1 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors">
+          <Link href={`/report/edit/${reportId}`} className="px-3 py-1 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors">
             Edit
           </Link>
         )}
