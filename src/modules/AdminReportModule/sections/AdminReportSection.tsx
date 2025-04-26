@@ -23,7 +23,6 @@ const formatDate = (isoString: string | null | undefined): string => {
   return `${dd}-${mm}-${yyyy} ${hh}:${min}:${ss}`;
 };
 
-// Interface untuk menyimpan data tambahan yang tidak ada di AdminReport
 interface ExtendedReportData {
   report: AdminReport;
   updateId: number | null;
