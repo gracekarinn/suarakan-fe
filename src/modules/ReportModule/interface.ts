@@ -83,3 +83,7 @@
     // AUTHORITY
     authority: Authority;
   }
+
+  export interface Report {
+    
+  }

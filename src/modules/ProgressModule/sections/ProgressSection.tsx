@@ -1,150 +1,205 @@
 "use client";
 
-import React, { useState } from "react";
-import { ReportUpdate } from "../interface";
-import { MOCK_UPDATES } from "../constant";
-import { Edit, Trash } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ReportUpdate, StatusType } from "../interface";
+import Link from "next/link";
+import { formatDate, getStatusColor, canEditReport, canDeleteReport, deleteReport } from "./utils";
 
-const ProgressSection: React.FC = () => {
-  const [updates] = useState<ReportUpdate[]>(MOCK_UPDATES);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
 
-  const handleEdit = (id: number) => {
-  };
+export default function ProgressSection() {
+  const [reports, setReports] = useState<ReportUpdate[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [deleteError, setDeleteError] = useState<string>("");
 
-  const handleDeleteClick = (id: number) => {
-    setPendingDeleteId(id);
-    setIsModalOpen(true);
-  };
+  const fetchReports = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) throw new Error("Token tidak ditemukan.");
 
-  const confirmDelete = () => {
-    if (pendingDeleteId !== null) {
+      const response = await fetch(`${BE_URL}/api/v1/reports`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem("access_token");
+          throw new Error("Akses ditolak. Silakan login kembali.");
+        }
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setReports(data);
+    } catch (err: unknown) {
+      setError(`Gagal mengambil data: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      console.error("Error fetching reports:", err);
+    } finally {
+      setLoading(false);
     }
-    setIsModalOpen(false);
-    setPendingDeleteId(null);
   };
 
-  const cancelDelete = () => {
-    setIsModalOpen(false);
-    setPendingDeleteId(null);
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const handleDelete = async (reportId: number) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus laporan ini?")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError("");
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) throw new Error("Token tidak ditemukan.");
+
+      await deleteReport({ reportId, token });
+      fetchReports(); 
+    } catch (err: unknown) {
+      setDeleteError(`Gagal menghapus laporan: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      console.error("Error deleting report:", err);
+    } finally {
+      setIsDeleting(false);
+    }
   };
+
+  const ActionButtons = ({ report, onDelete }: { report: ReportUpdate, onDelete: (reportId: number) => void }) => {
+    const status = report.update.status as StatusType;
+    const reportId = report.report.reportid;
+    
+    return (
+      <div className="flex mt-4 gap-2">
+        <Link href={`/reporter/detail/${reportId}`} className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+          Lihat Detail
+        </Link>
+
+        {canEditReport(status) && (
+          <Link href={`/reporter/edit/${reportId}`} className="px-3 py-1 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors">
+            Edit
+          </Link>
+        )}
+
+        {canDeleteReport(status) && (
+          <button 
+            onClick={() => onDelete(reportId)}
+            className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Menghapus..." : "Hapus"}
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[300px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-6 bg-red-50 rounded-lg text-red-600 my-4">
+        <p>{error}</p>
+        <button 
+          onClick={fetchReports}
+          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Coba Lagi
+        </button>
+      </div>
+    );
+  }
+
+  if (reports.length === 0) {
+    return (
+      <div className="text-center p-6 bg-gray-50 rounded-lg my-4">
+        <p className="text-gray-600">Belum ada laporan yang dibuat.</p>
+        <Link href="/reporter/create" className="mt-2 inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+          Buat Laporan Baru
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-white px-8 py-6">
-      {/* Header */}
-      <div className="mb-6 text-center">
-        <h1 className="text-3xl font-bold text-orange-700">Riwayat Pelaporan</h1>
-      </div>
-
-      {/* Tabel Progress */}
-      <div className="overflow-x-auto rounded-lg shadow border border-gray-200 bg-white">
-        <table className="min-w-full">
-          {/* Table Head */}
-          <thead className="bg-orange-100 text-orange-800 text-sm font-semibold">
-            <tr>
-              <th className="px-4 py-3 border">No Laporan</th>
-              <th className="px-4 py-3 border">Status</th>
-              <th className="px-4 py-3 border">Terakhir Diperbarui</th>
-              <th className="px-4 py-3 border">Catatan</th>
-              <th className="px-4 py-3 border">Bukti Penanganan</th>
-              <th className="px-4 py-3 border">Aksi</th>
-            </tr>
-          </thead>
-
-          {/* Table Body */}
-          <tbody>
-            {updates.map((item) => (
-              <tr key={item.updateId} className="hover:bg-orange-50">
-                <td className="px-4 py-2 text-center border">{item.reportId}</td>
-                <td className="px-4 py-2 text-center border">
-                  <span
-                    className={
-                      "px-3 py-1 rounded text-white text-sm font-medium " +
-                      (item.status === "Received"
-                        ? "bg-blue-500"
-                        : item.status === "Processing"
-                        ? "bg-yellow-500"
-                        : item.status === "Completed"
-                        ? "bg-green-500"
-                        : "bg-red-500")
-                    }
-                  >
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-4 py-2 text-center border">
-                  {new Date(item.updatedAt).toLocaleString("id-ID")}
-                </td>
-                <td className="px-4 py-2 border text-sm text-gray-700">
-                  {item.remarks || "-"}
-                </td>
-                <td className="px-4 py-2 text-center border">
-                  {item.proof ? (
-                    <a
-                      href={item.proof}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm"
-                    >
-                      Lihat Bukti
-                    </a>
-                  ) : (
-                    "-"
-                  )}
-                </td>
-                <td className="px-4 py-2 text-center border">
-                  <button
-                    className="mr-2 p-2 rounded bg-yellow-300 hover:bg-yellow-200 text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleEdit(item.updateId)}
-                    disabled={item.status !== "Received"}
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    className="p-2 rounded bg-yellow-300 hover:bg-yellow-200 text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleDeleteClick(item.updateId)}
-                    disabled={item.status !== "Received"}
-                  >
-                    <Trash size={16} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Modal Konfirmasi Hapus */}
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          {/* Background overlay */}
-          <div
-            className="fixed inset-0 bg-black opacity-50"
-            onClick={cancelDelete}
-          ></div>
-          <div className="bg-white rounded p-6 z-10 max-w-sm w-full mx-auto">
-            <h2 className="text-xl font-bold mb-4">Konfirmasi Hapus</h2>
-            <p className="mb-4">Apakah Anda yakin ingin menghapus laporan ini?</p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                Ya
-              </button>
-              <button
-                onClick={cancelDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Tidak
-              </button>
-            </div>
-          </div>
+    <div className="mt-6">
+      {deleteError && (
+        <div className="text-center p-4 bg-red-50 rounded-lg text-red-600 mb-4">
+          <p>{deleteError}</p>
         </div>
       )}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {reports.map((reportUpdate) => {
+          const report = reportUpdate.report;
+          const update = reportUpdate.update;
+          const status = update.status as StatusType;
+          
+          return (
+            <div key={report.reportid} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 flex flex-col">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="font-semibold text-lg">
+                  {report.reporterfullname || "Tidak Ada Nama"}
+                </h3>
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}>
+                  {status || "Tidak Ada Status"}
+                </span>
+              </div>
+              
+              <div className="space-y-2 flex-grow">
+                <div>
+                  <span className="text-gray-600 text-sm">Dibuat pada:</span>
+                  <p>{formatDate(report.createdat)}</p>
+                </div>
+                
+                <div>
+                  <span className="text-gray-600 text-sm">Diperbarui pada:</span>
+                  <p>{formatDate(update.updatedat)}</p>
+                </div>
+
+                <div>
+                  <span className="text-gray-600 text-sm">Keterangan:</span>
+                  <p>{update.remarks || "-"}</p>
+                </div>
+
+                <div>
+                  <span className="text-gray-600 text-sm">Bukti:</span>
+                  {update.proof && update.proof !== "" ? (
+                    <a 
+                      href={update.proof} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline break-all"
+                    >
+                      {update.proof}
+                    </a>
+                  ) : (
+                    <p>-</p>
+                  )}
+                </div>
+              </div>
+
+              <ActionButtons 
+                report={reportUpdate} 
+                onDelete={handleDelete} 
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
-};
-
-export default ProgressSection;
+}
