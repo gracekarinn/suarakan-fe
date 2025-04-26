@@ -91,7 +91,7 @@ export default function ProgressSection() {
         {canDeleteReport(status) && (
           <button 
             onClick={() => onDelete(reportId)}
-            className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors cursor-pointer"
             disabled={isDeleting}
           >
             {isDeleting ? "Menghapus..." : "Hapus"}
@@ -151,9 +151,14 @@ export default function ProgressSection() {
           return (
             <div key={report.reportid} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 flex flex-col">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="font-semibold text-lg">
-                  {report.reporterfullname || "Tidak Ada Nama"}
-                </h3>
+                <div className="">
+                  <h3 className="font-semibold text-lg">
+                    Korban: {report.victimfullname || "Tidak Ada Nama Korban"}
+                  </h3>
+                  <h3 className="font-semibold text-lg">
+                    Pelaku : {report.accusedfullname || "Tidak Ada Nama Pelaku"}
+                  </h3>
+                </div>
                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}>
                   {status || "Tidak Ada Status"}
                 </span>
@@ -166,7 +171,7 @@ export default function ProgressSection() {
                 </div>
                 
                 <div>
-                  <span className="text-gray-600 text-sm">Diperbarui pada:</span>
+                  <span className="text-gray-600 text-sm">Status diperbarui pada:</span>
                   <p>{formatDate(update.updatedat)}</p>
                 </div>
 

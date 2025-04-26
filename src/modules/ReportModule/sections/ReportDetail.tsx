@@ -160,7 +160,7 @@ const ReportDetail = () => {
                             {canDeleteReport(status) && (
                                 <button 
                                     onClick={handleDelete}
-                                    className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                                    className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors cursor-pointer"
                                     disabled={isDeleting}
                                 >
                                     {isDeleting ? "Menghapus..." : "Hapus"}
