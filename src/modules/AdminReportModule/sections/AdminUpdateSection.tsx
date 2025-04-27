@@ -198,11 +198,11 @@ const AdminUpdateSection = () => {
                 <p className="font-medium">{updateData.reportid}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Tanggal Dibuat:</p>
+                <p className="text-sm text-gray-600">Tanggal Laporan Dibuat:</p>
                 <p className="font-medium">{formatDate(updateData.createdat)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Terakhir Diperbarui:</p>
+                <p className="text-sm text-gray-600">Terakhir Diperbarui Admin:</p>
                 <p className="font-medium">{formatDate(updateData.updatedat)}</p>
               </div>
             </div>
