@@ -18,9 +18,15 @@ interface AdminReportDetailSectionProps {
   reportId: string;
 }
 
+// Mendefinisikan interface ExtendedReportData sama seperti di AdminReportSection.tsx
+interface ExtendedReportData {
+  report: AdminReport;
+  updateId: number | null;
+}
+
 export default function AdminReportDetailSection({ reportId }: AdminReportDetailSectionProps) {
   const router = useRouter();
-  const [reportData, setReportData] = useState<AdminReport | null>(null);
+  const [reportData, setReportData] = useState<ExtendedReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
@@ -51,15 +57,20 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
         }
 
         const data = await res.json();
-        const mapped = {
-          ...data.report,
-          status: data.update?.status ?? "received",
-          remarks: data.update?.remarks ?? "",
-          proof: data.update?.proof ?? "",
-          updatedat: data.update?.updatedat ?? null,
+        
+        // Gunakan format ExtendedReportData untuk konsistensi
+        const mappedReport: ExtendedReportData = {
+          report: {
+            ...data.report,
+            status: data.update?.status ?? "received",
+            remarks: data.update?.remarks ?? "",
+            proof: data.update?.proof ?? "",
+            updatedat: data.update?.updatedat ?? null,
+          },
+          updateId: data.update?.updateid ?? null,
         };
 
-        setReportData(mapped);
+        setReportData(mappedReport);
         setError(null);
       } catch (err) {
         if (err instanceof Error) setError(err.message);
@@ -73,7 +84,7 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
   }, [reportId]);
 
   const handleSendToAuthority = async () => {
-    if (!reportData || reportData.status?.toLowerCase() !== "received" || !reportData.authority) {
+    if (!reportData || reportData.report.status?.toLowerCase() !== "received" || !reportData.report.authority) {
       return;
     }
 
@@ -99,7 +110,8 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
   if (error) return <p className="p-10 text-red-600 text-center">{error}</p>;
   if (!reportData) return <p className="p-10 text-center">Data tidak ditemukan</p>;
 
-  const isStatusReceived = reportData.status?.toLowerCase() === "received";
+  const report = reportData.report;
+  const isStatusReceived = report.status?.toLowerCase() === "received";
 
   return (
     <div className="min-h-screen bg-white p-6 relative">
@@ -112,29 +124,29 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="font-medium">ID Laporan:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.reportid}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.reportid}</p>
             </div>
             <div>
               <label className="font-medium">Tanggal Pelaporan:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{formatDate(reportData.createdat)}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{formatDate(report.createdat)}</p>
             </div>
             <div>
               <label className="font-medium">Tanggal Update:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{formatDate(reportData.updatedat)}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{formatDate(report.updatedat)}</p>
             </div>
             <div>
               <label className="font-medium">Status:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.status}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.status}</p>
             </div>
             <div className="flex flex-col">
               <label className="font-medium">Instansi Terkait:</label>
               <div className="flex items-center gap-2">
-                <p className="bg-gray-100 rounded px-3 py-2 flex-grow">{reportData.authority || "-"}</p>
+                <p className="bg-gray-100 rounded px-3 py-2 flex-grow">{report.authority || "-"}</p>
                 <button
                   onClick={handleSendToAuthority}
-                  disabled={!isStatusReceived || sending || !reportData.authority}
+                  disabled={!isStatusReceived || sending || !report.authority}
                   className={`px-3 py-2 rounded text-white whitespace-nowrap ${
-                    isStatusReceived && reportData.authority
+                    isStatusReceived && report.authority
                       ? "bg-green-600 hover:bg-green-700"
                       : "bg-gray-400 cursor-not-allowed"
                   }`}
@@ -145,13 +157,13 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
             </div>
             <div>
               <label className="font-medium">Catatan:</label>
-              <p className="bg-gray-100 rounded px-3 py-2 whitespace-pre-wrap">{reportData.remarks || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2 whitespace-pre-wrap">{report.remarks || "-"}</p>
             </div>
             <div className="md:col-span-2">
               <label className="font-medium">Link Bukti:</label>
-              {reportData.proof ? (
-                <a href={reportData.proof} target="_blank" rel="noreferrer" className="text-blue-600 underline block bg-gray-100 rounded px-3 py-2">
-                  {reportData.proof}
+              {report.proof ? (
+                <a href={report.proof} target="_blank" rel="noreferrer" className="text-blue-600 underline block bg-gray-100 rounded px-3 py-2">
+                  {report.proof}
                 </a>
               ) : (
                 <p className="bg-gray-100 rounded px-3 py-2">Tidak tersedia</p>
@@ -166,23 +178,23 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="font-medium">Nama Pelapor:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{maskName(reportData.reporterfullname)}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{maskName(report.reporterfullname)}</p>
             </div>
             <div>
               <label className="font-medium">ID Pelapor:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.reporterid}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.reporterid}</p>
             </div>
             <div>
               <label className="font-medium">Alamat Pelapor:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.reporteraddress || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.reporteraddress || "-"}</p>
             </div>
             <div>
               <label className="font-medium">No. Telepon Pelapor:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.reporterphonenum || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.reporterphonenum || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Hubungan dengan Korban:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.reporterrelationship || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.reporterrelationship || "-"}</p>
             </div>
           </div>
         </div>
@@ -193,47 +205,47 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="font-medium">Nama Korban:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimfullname || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimfullname || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Tempat Lahir:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimplaceofbirth || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimplaceofbirth || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Tanggal Lahir:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimdateofbirth || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimdateofbirth || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Jenis Kelamin:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimsex || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimsex || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Email:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimemail || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimemail || "-"}</p>
             </div>
             <div>
               <label className="font-medium">No. Telepon:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimphonenum || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimphonenum || "-"}</p>
             </div>
             <div>
-              <label className="font-medium">Pekerjaan:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimoccupation || "-"}</p>
+              <label className="font-medium">Pekerjaan:</label>a
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimoccupation || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Tingkat Pendidikan:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimeducationlevel || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimeducationlevel || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Status Pernikahan:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimmarriagestatus || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimmarriagestatus || "-"}</p>
             </div>
             <div>
               <label className="font-medium">NIK:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimnik || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimnik || "-"}</p>
             </div>
             <div className="md:col-span-2">
               <label className="font-medium">Alamat:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.victimaddress || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.victimaddress || "-"}</p>
             </div>
           </div>
         </div>
@@ -244,27 +256,27 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="font-medium">Nama Terlapor:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.accusedfullname || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.accusedfullname || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Jenis Kelamin:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.accusedsex || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.accusedsex || "-"}</p>
             </div>
             <div>
               <label className="font-medium">No. Telepon:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.accusedphonenum || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.accusedphonenum || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Pekerjaan:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.accusedoccupation || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.accusedoccupation || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Hubungan dengan Korban:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.accusedrelationship || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.accusedrelationship || "-"}</p>
             </div>
             <div className="md:col-span-2">
               <label className="font-medium">Alamat:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.accusedaddress || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.accusedaddress || "-"}</p>
             </div>
           </div>
         </div>
@@ -275,21 +287,21 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="font-medium">Deskripsi Insiden:</label>
-              <p className="bg-gray-100 rounded px-3 py-2 whitespace-pre-wrap">{reportData.incidentdescription || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2 whitespace-pre-wrap">{report.incidentdescription || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Lokasi Insiden:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.incidentlocation || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.incidentlocation || "-"}</p>
             </div>
             <div>
               <label className="font-medium">Waktu Insiden:</label>
-              <p className="bg-gray-100 rounded px-3 py-2">{reportData.incidenttime || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2">{report.incidenttime || "-"}</p>
             </div>
             <div className="md:col-span-2">
               <label className="font-medium">Bukti Insiden:</label>
-              {reportData.incidentproof ? (
-                <a href={reportData.incidentproof} target="_blank" rel="noreferrer" className="text-blue-600 underline block bg-gray-100 rounded px-3 py-2">
-                  {reportData.incidentproof}
+              {report.incidentproof ? (
+                <a href={report.incidentproof} target="_blank" rel="noreferrer" className="text-blue-600 underline block bg-gray-100 rounded px-3 py-2">
+                  {report.incidentproof}
                 </a>
               ) : (
                 <p className="bg-gray-100 rounded px-3 py-2">Tidak tersedia</p>
@@ -297,7 +309,7 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
             </div>
             <div className="md:col-span-2">
               <label className="font-medium">Kebutuhan Korban:</label>
-              <p className="bg-gray-100 rounded px-3 py-2 whitespace-pre-wrap">{reportData.incidentvictimneeds || "-"}</p>
+              <p className="bg-gray-100 rounded px-3 py-2 whitespace-pre-wrap">{report.incidentvictimneeds || "-"}</p>
             </div>
           </div>
         </div>
@@ -309,7 +321,7 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h3 className="text-xl font-bold text-green-700 mb-4">Berhasil Mengirim Laporan</h3>
             <p className="mb-6">
-              Laporan telah berhasil dikirim ke {reportData.authority}. Jangan lupa untuk memperbarui status laporan secara manual.
+              Laporan telah berhasil dikirim ke {report.authority}. Jangan lupa untuk memperbarui status laporan secara manual.
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -319,7 +331,7 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
                 Tutup
               </button>
               <button
-                onClick={() => router.push(`/admin/update/${reportData.reportid}`)}
+                onClick={() => router.push(reportData.updateId ? `/admin/update/${reportData.updateId}` : `/admin/update/${report.reportid}`)}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Update Status
