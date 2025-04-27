@@ -503,24 +503,6 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           </div>
         </div>
       )}
-
-      <div className="mt-6 flex justify-between">
-        <button
-          onClick={() => router.push("/admin/report")}
-          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md flex items-center"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Kembali ke Daftar Laporan
-        </button>
-        
-        <button
-          onClick={() => router.push(reportData.updateId ? `/admin/update/${reportData.updateId}` : `/admin/update/${report.reportid}`)}
-          className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md flex items-center"
-        >
-          <CheckCircle className="h-4 w-4 mr-2" />
-          Update Status Laporan
-        </button>
-      </div>
     </div>
   );
 }
