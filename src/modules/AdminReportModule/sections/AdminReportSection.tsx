@@ -56,7 +56,6 @@ export default function UpdateReportSection() {
         }
 
         const rawData = await response.json();
-        // Mapping data dengan updateId disimpan terpisah
         const mappedData: ExtendedReportData[] = rawData.map((item: any) => ({
           report: {
             ...item.report,
@@ -103,8 +102,8 @@ export default function UpdateReportSection() {
                 <th className="px-4 py-3 border">No.</th>
                 <th className="px-4 py-3 border text-left">Nama Pelapor</th>
                 <th className="px-4 py-3 border text-left">Deskripsi Insiden</th>
-                <th className="px-4 py-3 border">Tanggal Pembuatan Laporan</th>
-                <th className="px-4 py-3 border">Tanggal Update Laporan</th>
+                <th className="px-4 py-3 border">Waktu Pembuatan Laporan</th>
+                <th className="px-4 py-3 border">Terakhir Diperbarui</th>
                 <th className="px-4 py-3 border text-center">Aksi</th>
               </tr>
             </thead>
