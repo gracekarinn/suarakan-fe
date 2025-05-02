@@ -5,4 +5,4 @@ const page = () => {
   return <HomepageModule />;
 };
 
-export default page;
+export default page;
