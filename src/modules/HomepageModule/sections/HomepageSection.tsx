@@ -1,5 +1,3 @@
-// modules/homepagemodules/sections/homepagesection.tsx
-
 'use client';
 import Image from "next/image";
 import React from "react";

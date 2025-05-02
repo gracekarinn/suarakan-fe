@@ -1,5 +1,3 @@
-// modules/homepagemodules/sections/constant.ts
-
 import { IHomepageContent } from "./interface";
 
 export const homepageContent: IHomepageContent = {
