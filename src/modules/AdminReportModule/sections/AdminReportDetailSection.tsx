@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { AdminReport } from "../interface";
 import { maskName } from "./utils";
 import { ArrowLeft, Send, CheckCircle, AlertTriangle, Loader2, ExternalLink } from "lucide-react";
@@ -16,17 +16,16 @@ const formatDate = (isoString: string | null | undefined): string => {
   return `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 };
 
-interface AdminReportDetailSectionProps {
-  reportId: string;
-}
-
 interface ExtendedReportData {
   report: AdminReport;
   updateId: number | null;
 }
 
-export default function AdminReportDetailSection({ reportId }: AdminReportDetailSectionProps) {
+export default function AdminReportDetailSection() {
+  const params = useParams();
+  const reportId = params.id as string;
   const router = useRouter();
+  
   const [reportData, setReportData] = useState<ExtendedReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -210,7 +209,6 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
       )}
 
       <div className="space-y-6 max-w-4xl">
-        {/* Quick Actions */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 mb-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-3">Tindakan Cepat</h2>
           <div className="flex gap-3">
@@ -246,7 +244,6 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           </div>
         </div>
 
-        {/* Informasi Laporan */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold text-orange-700 mb-4 flex items-center">
             <div className="bg-orange-100 p-2 rounded-full mr-2">
@@ -295,7 +292,6 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           </div>
         </div>
 
-        {/* Informasi Pelapor */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold text-blue-700 mb-4 flex items-center">
             <div className="bg-blue-100 p-2 rounded-full mr-2">
@@ -330,7 +326,6 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           </div>
         </div>
 
-        {/* Informasi Korban */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold text-green-700 mb-4 flex items-center">
             <div className="bg-green-100 p-2 rounded-full mr-2">
@@ -391,7 +386,6 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           </div>
         </div>
 
-        {/* Informasi Terlapor */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold text-red-700 mb-4 flex items-center">
             <div className="bg-red-100 p-2 rounded-full mr-2">
@@ -432,7 +426,6 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
           </div>
         </div>
 
-        {/* Informasi Insiden */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
           <h2 className="text-xl font-semibold text-purple-700 mb-4 flex items-center">
             <div className="bg-purple-100 p-2 rounded-full mr-2">
@@ -474,7 +467,6 @@ export default function AdminReportDetailSection({ reportId }: AdminReportDetail
         </div>
       </div>
 
-      {/* Success Popup */}
       {showPopup && sendSuccess && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
