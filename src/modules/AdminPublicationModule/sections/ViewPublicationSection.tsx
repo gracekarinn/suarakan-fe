@@ -27,12 +27,12 @@ const ViewPublicationSection = () => {
 
         const data = await res.json();
         setPub({
-          id: data.id,
+          publicationid: data.id,
           title: data.title,
           description: data.description,
-          fileLink: data.filelink,
-          createdAt: data.createdat,
-          updatedAt: data.updatedat,
+          filelink: data.filelink,
+          createdat: data.createdat,
+          updatedat: data.updatedat,
         });
       } catch (err) {
         if (err instanceof Error) setError(err.message);
