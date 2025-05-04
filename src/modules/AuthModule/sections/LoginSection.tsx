@@ -4,7 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:8000";
+const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL;
 
 interface LoginFormData {
   email: string;
