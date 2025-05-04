@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ReportUpdate, StatusType } from "@/modules/ReportModule/interface";
 import { formatDate, getStatusColor, canEditReport, canDeleteReport, deleteReport } from "./utils";
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
 
 const ReportDetail = () => {
     const { id } = useParams();

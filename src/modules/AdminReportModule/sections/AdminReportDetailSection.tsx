@@ -7,7 +7,7 @@ import { maskName } from "./utils";
 import { ArrowLeft, Send, CheckCircle, AlertTriangle, Loader2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
 
 const formatDate = (isoString: string | null | undefined): string => {
   if (!isoString) return "-";

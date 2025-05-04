@@ -5,7 +5,7 @@ import { ReportUpdate, StatusType } from "../interface";
 import Link from "next/link";
 import { formatDate, getStatusColor, canEditReport, canDeleteReport, deleteReport } from "./utils";
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
 
 export default function ProgressSection() {
   const [reports, setReports] = useState<ReportUpdate[]>([]);

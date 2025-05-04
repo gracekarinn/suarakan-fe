@@ -1,6 +1,6 @@
 import { DeleteReportParams, StatusType } from "../interface";
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
 
 export const formatDate = (dateString: string | null): string => {
   if (!dateString) return "-";

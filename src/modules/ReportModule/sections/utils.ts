@@ -101,7 +101,7 @@ export function canDeleteReport(status: StatusType): boolean {
 }
 
 export async function deleteReport({ reportId, token }: { reportId: number, token: string }): Promise<void> {
-    const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+    const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
     
     const response = await fetch(`${BE_URL}/api/v1/reports/${reportId}`, {
         method: "DELETE",

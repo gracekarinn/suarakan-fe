@@ -16,7 +16,7 @@ import {
     formatDateTimeForBackend
   } from './utils';
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:3000";
+const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
 
 const EditReport = () => {
     const { id } = useParams();
