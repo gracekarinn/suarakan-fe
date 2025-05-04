@@ -30,7 +30,7 @@ const Nav = () => {
 
   const fetchUserData = async (token: string) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/api/auth/user-profile/`, {
+      const res = await fetch(`https://kelompok-3-suarakan-auth.pkpl.cs.ui.ac.id/api/auth/user-profile/`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
+const BE_URL = "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
 
 const EditPublicationSection = () => {
   const { id } = useParams();

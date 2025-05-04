@@ -15,7 +15,7 @@ import {
   formatDateForBackend
 } from './utils';
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
+const BE_URL = "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
 
 const ReportForm: React.FC = () => {
   const router = useRouter();

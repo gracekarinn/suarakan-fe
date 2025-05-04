@@ -20,5 +20,5 @@ variables:
   PODS_TESTNUM: 12312312
   PODS_TESTEQ: 123123=12312312
   NEXT_PUBLIC_TEST: true
-  NEXT_PUBLIC_BE_URL: "$NEXT_PUBLIC_BE_URL"
-  NEXT_PUBLIC_AUTH_URL: "$NEXT_PUBLIC_AUTH_URL"
+  NEXT_PUBLIC_BE_URL: "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
+  NEXT_PUBLIC_AUTH_URL: "https://kelompok-3-suarakan-auth.pkpl.cs.ui.ac.id"

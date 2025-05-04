@@ -6,7 +6,7 @@ import Link from "next/link";
 import { AdminReport } from "../interface";
 import { sanitizeString, maskName } from "./utils";
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
+const BE_URL = "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
 
 const formatDate = (isoString: string | null | undefined): string => {
   if (!isoString) return "-";

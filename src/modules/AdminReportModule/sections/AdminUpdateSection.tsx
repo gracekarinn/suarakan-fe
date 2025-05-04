@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save, Loader2, AlertTriangle } from "lucide-react";
 import { UpdateReport } from "../interface";
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL ?? "http://localhost:4000";
+const BE_URL = "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
 
 const statusOptions = ["Received", "Processing", "Completed", "Rejected"];
 

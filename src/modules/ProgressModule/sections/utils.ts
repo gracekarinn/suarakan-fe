@@ -1,6 +1,6 @@
 import { DeleteReportParams, StatusType } from "../interface";
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
+const BE_URL = "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
 
 export const formatDate = (dateString: string | null): string => {
   if (!dateString) return "-";

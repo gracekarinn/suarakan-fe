@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Publication } from "@/modules/PublicationModule/interface";
 
-const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
+const BE_URL = "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
 
 export default function PublicationSection() {
   const [publications, setPublications] = useState<Publication[]>([]);
