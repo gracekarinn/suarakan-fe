@@ -34,6 +34,10 @@ spec:
             value: "$HTTP_PROXY"
           - name: NO_PROXY
             value: "localhost,127.0.0.1,.cluster.local,.svc"
+          - name: NEXT_PUBLIC_AUTH_URL
+            value: "https://kelompok-3-suarakan-auth.pkpl.cs.ui.ac.id"
+          - name: NEXT_PUBLIC_BE_URL
+            value: "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
         resources:
           requests:
             memory: "$MIN_MEMORY" 
