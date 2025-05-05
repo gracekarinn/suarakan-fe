@@ -1,10 +1,17 @@
-// modules/AuthModule/index.tsx
+import LoginSection from "./sections/LoginSection";
+import RegisterSection from "./sections/RegisterSection";
 import { ReactNode } from "react";
 
-export default function AuthModule({ children }: { children: ReactNode }) {
+export const RegisterModule = () => {
   return (
-      <div>
-        {children}
-      </div>
-  );
+    <RegisterSection />
+  )
 }
+
+export const LoginModule = () => {
+  return (
+    <LoginSection />
+  )
+}
+
+
