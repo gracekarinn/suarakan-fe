@@ -6,7 +6,7 @@ export const homepageContent: IHomepageContent = {
     subtitle:
       "Platform pengaduan bagi korban pelecehan seksual di lingkungan Universitas Indonesia. Laporkan kasus, pantau perkembangan penanganan oleh Satgas PPKS, dan akses publikasi transparan terkait solusi.",
     buttonText: "Laporkan",
-    image: "/hero-image.jpg",
+    image: "/hero-image.png",
   },
   whySuarakanSection: {
     heading: "Mengapa SUARAKAN?",
