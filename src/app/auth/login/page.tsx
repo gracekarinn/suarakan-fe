@@ -1,10 +1,11 @@
-import AuthModule from "@/modules/AuthModule";
-import LoginSection from "@/modules/AuthModule/sections/LoginSection";
+import React from 'react'
+import { LoginModule } from '@/modules/AuthModule'
 
-export default function LoginPage() {
+const page = () => {
   return (
-    <AuthModule>
-      <LoginSection />
-    </AuthModule>
-  );
+    <LoginModule />
+  )
 }
+
+export default page
+
