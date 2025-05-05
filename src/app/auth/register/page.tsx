@@ -1,10 +1,10 @@
-import AuthModule from "@/modules/AuthModule";
-import RegisterSection from "@/modules/AuthModule/sections/RegisterSection";
+import { RegisterModule } from "@/modules/AuthModule";
+import React from 'react'
 
-export default function RegisterPage() {
+const page = () => {
   return (
-    <AuthModule>
-      <RegisterSection />
-    </AuthModule>
-  );
+    <RegisterModule />
+  )
 }
+
+export default page
