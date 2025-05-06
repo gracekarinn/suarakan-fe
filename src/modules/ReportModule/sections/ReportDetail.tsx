@@ -17,6 +17,7 @@ const ReportDetail = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState("");
     const [showSessionExpiredModal, setShowSessionExpiredModal] = useState<boolean>(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     useEffect(() => {
         const fetchReport = async () => {
@@ -62,10 +63,6 @@ const ReportDetail = () => {
     const handleDelete = async () => {
         if (!report) return;
         
-        if (!confirm("Apakah Anda yakin ingin menghapus laporan ini?")) {
-            return;
-        }
-
         setIsDeleting(true);
         setDeleteError("");
         try {
@@ -90,7 +87,12 @@ const ReportDetail = () => {
             }
         } finally {
             setIsDeleting(false);
+            setShowConfirmModal(false);
         }
+    };
+
+    const cancelDelete = () => {
+        setShowConfirmModal(false);
     };
 
     const handleRedirectToLogin = () => {
@@ -153,6 +155,63 @@ const ReportDetail = () => {
                     </div>
                 </div>
             </div>
+        );
+    };
+
+    const ConfirmationModal = () => {
+        if (!showConfirmModal) return null;
+        
+        return (
+            <>
+                <div 
+                    className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center"
+                    onClick={cancelDelete}
+                >
+                    <div 
+                        className="bg-white rounded-xl p-6 shadow-lg max-w-md w-11/12 mx-auto relative z-50 animate-fadeIn"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 rounded-full bg-[#FFCAD4]/30 flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-[#6A4C93]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-[#6A4C93] mb-2">Konfirmasi Penghapusan</h3>
+                            <p className="text-[#1A1A2E]/80">Apakah Anda yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.</p>
+                        </div>
+                        
+                        <div className="flex gap-4 justify-center">
+                            <button
+                                onClick={cancelDelete}
+                                className="px-5 py-2 bg-gray-200 text-[#1A1A2E] rounded-lg hover:bg-gray-300 transition-all shadow hover:shadow-md font-medium flex-1 cursor-pointer"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="px-5 py-2 bg-[#FFCAD4] text-[#1A1A2E] rounded-lg hover:bg-[#FFCAD4]/80 transition-all shadow hover:shadow-md font-medium flex-1 flex items-center justify-center cursor-pointer"
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-[#1A1A2E]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Menghapus...
+                                    </>
+                                ) : (
+                                    "Hapus"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </>
         );
     };
 
@@ -263,6 +322,7 @@ const ReportDetail = () => {
     return (
         <>
             <SessionExpiredModal />
+            <ConfirmationModal />
             
             <div className="min-h-screen w-full bg-white py-12 px-4">
                 <div className="container mx-auto max-w-5xl">
@@ -344,27 +404,15 @@ const ReportDetail = () => {
                                 
                                 {canDeleteReport(status) && (
                                     <button 
-                                        onClick={handleDelete}
+                                        onClick={() => setShowConfirmModal(true)}
                                         disabled={isDeleting}
-                                        className="group bg-transparent border-2 border-[#FFCAD4] text-[#6A4C93] font-medium py-2 px-4 rounded-lg hover:bg-[#FFCAD4]/10 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="group bg-transparent border-2 border-[#FFCAD4] text-[#6A4C93] font-medium py-2 px-4 rounded-lg hover:bg-[#FFCAD4]/10 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                     >
                                         <span className="relative z-10 inline-flex items-center justify-center">
-                                            {isDeleting ? (
-                                                <>
-                                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                    Menghapus...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                    Hapus
-                                                </>
-                                            )}
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Hapus
                                         </span>
                                     </button>
                                 )}

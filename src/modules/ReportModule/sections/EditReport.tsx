@@ -88,7 +88,6 @@ const EditReport = () => {
                 const data = await response.json();
                 const report = data.report;
 
-                // Format dates for input fields
                 const incidentTime = report.incidenttime ? 
                     formatDateTimeForBackend(report.incidenttime).slice(0, 16) : '';
                 const victimDateOfBirth = report.victimdateofbirth ?
@@ -310,8 +309,8 @@ const EditReport = () => {
     }
 
     return (
-        <div className="p-6 max-w-4xl mx-auto bg-white shadow-md rounded-xl">
-            <h2 className="text-3xl font-bold text-[#8B322C] mb-6 text-center">Edit Formulir Pengaduan</h2>
+        <div className="p-6 max-w-4xl mx-auto bg-white shadow-md rounded-xl mb-4 mt-4">
+            <h2 className="text-3xl font-bold text-[#6A4C93] mb-6 text-center">Edit Formulir Pengaduan</h2>
             
             {submitError && (
                 <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-300 rounded">
@@ -322,7 +321,7 @@ const EditReport = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* 1. Identitas Pelapor Section */}
                 <div className="bg-gray-100 p-4 rounded-xl">
-                    <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">1. Identitas Pelapor</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-[#6A4C93]">1. Identitas Pelapor</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <input
                             type="text"
@@ -367,7 +366,7 @@ const EditReport = () => {
 
                 {/* 2. Informasi Pelanggaran Section */}
                 <div className="bg-gray-100 p-4 rounded-xl">
-                    <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">2. Informasi Pelanggaran</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-[#6A4C93]">2. Informasi Pelanggaran</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <input
@@ -430,7 +429,7 @@ const EditReport = () => {
 
                 {/* 3. Identitas Korban Section */}
                 <div className="bg-gray-100 p-4 rounded-xl">
-                    <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">3. Identitas Korban</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-[#6A4C93]">3. Identitas Korban</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <input
@@ -550,7 +549,7 @@ const EditReport = () => {
 
                 {/* 4. Identitas Terdakwa Section */}
                 <div className="bg-gray-100 p-4 rounded-xl">
-                    <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">4. Identitas Terdakwa</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-[#6A4C93]">4. Identitas Terdakwa</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <input
@@ -619,7 +618,7 @@ const EditReport = () => {
 
                 {/* 5. Level Pengaduan Section */}
                 <div className="bg-gray-100 p-4 rounded-xl">
-                    <h3 className="text-xl font-semibold mb-4 text-[#8B322C]">5. Tujuan Pengaduan</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-[#6A4C93]">5. Tujuan Pengaduan</h3>
                     <div className="grid grid-cols-1 gap-4">
                         <div>
                             <select
@@ -648,7 +647,7 @@ const EditReport = () => {
                     </Link>
                     <button 
                         type="submit" 
-                        className="w-1/2 bg-[#DD5746] text-white px-6 py-3 rounded-xl hover:bg-[#C04737] transition-colors disabled:bg-gray-400 cursor-pointer"
+                        className="w-1/2 bg-[#6A4C93] text-white px-6 py-3 rounded-xl hover:bg-[#8364B0] transition-colors disabled:bg-gray-400 cursor-pointer"
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? 'Mengupdate...' : 'Edit Laporan'}
