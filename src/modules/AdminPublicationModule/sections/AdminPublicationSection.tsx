@@ -1,5 +1,4 @@
 "use client";
-import { Pencil, Trash2, Eye } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -124,11 +123,40 @@ export default function AdminPublicationSection() {
   const cancelDelete = () => setIsModalOpen(false);
 
   if (loading) {
-    return <p className="text-center py-10">Memuat publikasi...</p>;
+    return (
+      <div className="bg-[#F8F4FC] min-h-screen flex justify-center items-center">
+        <div className="bg-white p-8 rounded-xl shadow-md">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6A4C93]"></div>
+          </div>
+          <p className="text-center mt-4 text-[#6A4C93]">Memuat publikasi...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center text-red-500 py-10">{error}</p>;
+    return (
+      <div className="bg-[#F8F4FC] min-h-screen flex justify-center items-center">
+        <div className="bg-white p-8 rounded-xl shadow-md max-w-md w-full">
+          <div className="flex justify-center text-[#FFCAD4] mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-center text-[#6A4C93] mb-2">Terjadi Kesalahan</h2>
+          <p className="text-center text-[#1A1A2E] mb-4">{error}</p>
+          <div className="flex justify-center">
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-[#6A4C93] text-white font-medium py-2 px-6 rounded-lg hover:bg-[#6A4C93]/90 transition-all shadow-md"
+            >
+              Coba Lagi
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -236,19 +264,32 @@ export default function AdminPublicationSection() {
                         <div className="flex space-x-2">
                           <Link href={`/admin/publication/${pub.publicationid}`}>
                             <button className="p-2 rounded-lg bg-[#9AC4F8]/20 hover:bg-[#9AC4F8]/40 text-[#6A4C93] transition-colors">
-                              <Eye size={16} />
+                              {/* Eye icon */}
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
                             </button>
                           </Link>
                           <Link href={`/admin/publication/edit/${pub.publicationid}`}>
                             <button className="p-2 rounded-lg bg-[#FFCAD4]/20 hover:bg-[#FFCAD4]/40 text-[#6A4C93] transition-colors">
-                              <Pencil size={16} />
+                              {/* Pencil icon */}
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                              </svg>
                             </button>
                           </Link>
                           <button
                             onClick={() => handleDelete(pub.publicationid)}
                             className="p-2 rounded-lg bg-[#FFCAD4]/20 hover:bg-[#FFCAD4]/40 text-[#6A4C93] transition-colors"
                           >
-                            <Trash2 size={16} />
+                            {/* Trash icon */}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                              <line x1="10" y1="11" x2="10" y2="17"></line>
+                              <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
                           </button>
                         </div>
                       </td>

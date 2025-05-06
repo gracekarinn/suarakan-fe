@@ -26,8 +26,11 @@ const ViewPublicationSection = () => {
         if (!res.ok) throw new Error("Gagal memuat publikasi.");
 
         const data = await res.json();
+        console.log("API response:", data); // Log to see actual API response
+        
+        // Fix: Use the correct property name for ID
         setPub({
-          publicationid: data.id,
+          publicationid: data.publicationid, // Use publicationid from API or data.id if that's what API returns
           title: data.title,
           description: data.description,
           filelink: data.filelink,

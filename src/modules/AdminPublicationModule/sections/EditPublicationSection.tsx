@@ -7,7 +7,8 @@ import Link from "next/link";
 const BE_URL = "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
 
 const EditPublicationSection = () => {
-  const { id } = useParams();
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const router = useRouter();
   const [form, setForm] = useState({
     title: "",
@@ -17,9 +18,16 @@ const EditPublicationSection = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isPermissionError, setIsPermissionError] = useState(false);
 
   useEffect(() => {
     const fetchPublication = async () => {
+      if (!id) {
+        setError("ID publikasi tidak ditemukan.");
+        setLoading(false);
+        return;
+      }
+
       try {
         const token = localStorage.getItem("access_token") || "";
         const res = await fetch(`${BE_URL}/api/v1/publications/${id}`, {
@@ -28,9 +36,17 @@ const EditPublicationSection = () => {
           },
         });
 
-        if (!res.ok) throw new Error("Gagal memuat data publikasi.");
+        if (!res.ok) {
+          if (res.status === 403) {
+            setIsPermissionError(true);
+            throw new Error("Anda tidak memiliki izin untuk mengedit publikasi ini. Admin hanya dapat mengedit publikasi yang dibuat sendiri.");
+          }
+          throw new Error("Gagal memuat data publikasi.");
+        }
 
         const data = await res.json();
+        console.log("Publication data:", data);
+        
         setForm({
           title: data.title,
           description: data.description,
@@ -56,6 +72,12 @@ const EditPublicationSection = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!id) {
+      setError("ID publikasi tidak ditemukan.");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("access_token") || "";
       const res = await fetch(`${BE_URL}/api/v1/publications/${id}`, {
@@ -70,20 +92,114 @@ const EditPublicationSection = () => {
           filelink: form.filelink,
           updatedat: new Date().toISOString().split("T")[0],
         }),
+        credentials: "include"
       });
 
-      if (!res.ok) throw new Error("Gagal memperbarui publikasi.");
+      if (!res.ok) {
+        // Handle specific error cases
+        if (res.status === 403) {
+          setIsPermissionError(true);
+          throw new Error("Anda tidak memiliki izin untuk mengedit publikasi ini. Admin hanya dapat mengedit publikasi yang dibuat sendiri.");
+        } else if (res.status === 401) {
+          localStorage.removeItem('access_token');
+          router.push('/auth/login');
+          return;
+        }
+        
+        throw new Error("Gagal memperbarui publikasi.");
+      }
 
       router.push("/admin/publication");
     } catch (err) {
+      console.error("Error:", err);
       if (err instanceof Error) setError(err.message);
       else setError("Terjadi kesalahan saat menyimpan.");
     }
   };
 
-  if (loading) return <div className="p-6">Memuat data...</div>;
-  if (error) return <div className="p-6 text-red-500">{error}</div>;
+  const handleGoBack = () => {
+    router.back();
+  };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="bg-[#F8F4FC] min-h-screen flex justify-center items-center">
+        <div className="bg-white p-8 rounded-xl shadow-md">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6A4C93]"></div>
+          </div>
+          <p className="text-center mt-4 text-[#6A4C93]">Memuat data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Permission error display
+  if (error && isPermissionError) {
+    return (
+      <div className="bg-[#F8F4FC] min-h-screen py-12 px-4 md:px-8">
+        <div className="container mx-auto max-w-3xl">
+          <div className="bg-white p-8 rounded-xl shadow-md border border-[#FFCAD4]/30">
+            <div className="flex items-center justify-center mb-6 text-[#FFCAD4]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m3-14a7 7 0 00-7 7v0a7 7 0 007 7v0a7 7 0 007-7v0a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-center text-[#6A4C93] mb-4">Akses Ditolak</h2>
+            <p className="text-center mb-6 text-[#1A1A2E]">{error}</p>
+            <div className="flex justify-center">
+              <button
+                onClick={handleGoBack}
+                className="bg-[#6A4C93] text-white font-medium py-2 px-6 rounded-lg hover:bg-[#6A4C93]/90 transition-all shadow-md hover:shadow-lg mr-4"
+              >
+                Kembali ke Halaman Sebelumnya
+              </button>
+              <Link href="/admin/publication">
+                <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-lg transition-all">
+                  Ke Dashboard Publikasi
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // General error display
+  if (error) {
+    return (
+      <div className="bg-[#F8F4FC] min-h-screen py-12 px-4 md:px-8">
+        <div className="container mx-auto max-w-3xl">
+          <div className="bg-white p-8 rounded-xl shadow-md border border-[#FFCAD4]/30">
+            <div className="flex items-center justify-center mb-6 text-[#FFCAD4]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-center text-[#6A4C93] mb-4">Terjadi Kesalahan</h2>
+            <p className="text-center mb-6 text-[#1A1A2E]">{error}</p>
+            <div className="flex justify-center">
+              <button
+                onClick={handleGoBack}
+                className="bg-[#6A4C93] text-white font-medium py-2 px-6 rounded-lg hover:bg-[#6A4C93]/90 transition-all shadow-md hover:shadow-lg mr-4"
+              >
+                Kembali ke Halaman Sebelumnya
+              </button>
+              <Link href="/admin/publication">
+                <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-lg transition-all">
+                  Ke Dashboard Publikasi
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Normal form display
   return (
     <div className="bg-[#F8F4FC] min-h-screen">
       <section className="py-12 px-4 md:px-8 relative overflow-hidden">
@@ -114,7 +230,7 @@ const EditPublicationSection = () => {
             <Link href="/admin/publication">
               <button className="group bg-[#6A4C93] text-white font-medium py-2 px-6 rounded-lg hover:bg-[#6A4C93]/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 relative overflow-hidden flex items-center">
                 <span className="relative z-10 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                   Kembali

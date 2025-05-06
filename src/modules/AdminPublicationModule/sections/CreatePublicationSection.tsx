@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const BE_URL = "http://localhost:8000"
+const BE_URL = "https://kelompok-3-suarakan-be.pkpl.cs.ui.ac.id"
 
 const CreatePublicationSection = () => {
   const router = useRouter();
@@ -12,7 +12,7 @@ const CreatePublicationSection = () => {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    filelink: "", // Changed to match API field name in other components
+    filelink: "",
   });
 
   const [error, setError] = useState("");
