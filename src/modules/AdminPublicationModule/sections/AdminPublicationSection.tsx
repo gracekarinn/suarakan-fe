@@ -162,7 +162,7 @@ export default function AdminPublicationSection() {
   return (
     <div className="bg-[#F8F4FC] min-h-screen">
       <section className="py-12 px-4 md:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#6A4C93]/10 to-[#9AC4F8]/15">
+        <div>
           <div className="absolute top-20 left-20 w-32 h-32 rounded-full bg-[#FFCAD4]/10"></div>
           <div className="absolute bottom-20 right-20 w-24 h-24 rounded-full bg-[#9AC4F8]/10"></div>
           <div className="absolute top-1/2 left-1/3 w-16 h-16 rounded-full bg-[#6A4C93]/10"></div>
@@ -189,8 +189,8 @@ export default function AdminPublicationSection() {
             <Link href="/admin/publication/create">
               <button className="group bg-[#6A4C93] text-white font-medium py-2 px-6 rounded-lg hover:bg-[#6A4C93]/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 relative overflow-hidden flex items-center">
                 <span className="relative z-10 flex items-center">
-                  + Buat Publikasi
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   Buat Publikasi
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </span>
@@ -264,7 +264,6 @@ export default function AdminPublicationSection() {
                         <div className="flex space-x-2">
                           <Link href={`/admin/publication/${pub.publicationid}`}>
                             <button className="p-2 rounded-lg bg-[#9AC4F8]/20 hover:bg-[#9AC4F8]/40 text-[#6A4C93] transition-colors">
-                              {/* Eye icon */}
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                 <circle cx="12" cy="12" r="3"></circle>
@@ -273,7 +272,6 @@ export default function AdminPublicationSection() {
                           </Link>
                           <Link href={`/admin/publication/edit/${pub.publicationid}`}>
                             <button className="p-2 rounded-lg bg-[#FFCAD4]/20 hover:bg-[#FFCAD4]/40 text-[#6A4C93] transition-colors">
-                              {/* Pencil icon */}
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
                               </svg>
